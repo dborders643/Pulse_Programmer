@@ -1,0 +1,33 @@
+# Quartus Build Artifacts
+db/
+incremental_db/
+output_files/
+simulation/
+timing/
+*.rpt
+*.smsg
+*.summary
+*.done
+*.jdi
+*.pin
+*.qws
+
+# Programming Files
+*.sof
+*.pof
+*.rbf
+
+# Simulation Junk
+work/
+transcript
+*.wlf
+*.vcd
+
+# IP Blocks
+async_FIFO.v
+pll_150mhz.v
+
+# Other Stuff
+*.out
+*.qsf
+*.qpf

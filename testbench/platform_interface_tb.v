@@ -16,9 +16,10 @@ module platform_interface_tb();
     wire [9:0] db;
 
     // opcodes defined
-    localparam OPCODE_SET_FTW = 32'h0000_0001;
-    localparam OPCODE_SET_PTW = 32'h0000_0002;
-    localparam OPCODE_TIMER = 32'h0000_0003;
+    localparam OP_FTW = 2'b00;
+    localparam OP_PTW = 2'b01; 
+    localparam OP_PULSE = 2'b10;
+    localparam OP_DELAY = 2'b11;
 
     // instantiate top-level module (platform_interface.v)
     platform_interface dut (
@@ -38,10 +39,11 @@ module platform_interface_tb();
     task avalon_write;
         input [31:0] data;
         begin
-            // write to data reg
-            @(posedge clk_50mhz);
             avs_write_data = data;
             avs_write = 1'b1;
+            @(posedge clk_50mhz);
+            #1;
+            avs_write = 1'b0;
         end
     endtask
 
@@ -61,31 +63,28 @@ module platform_interface_tb();
         #100;       // wait for PLL sim block to stabilize and lock
 
         // 2. Configure Frequency (FTW)
-        // passing in 1 MHz desired f_out --> FTW = f_out * 2^N/f_ref_clk ==> FTW = 1e6*2^32 / 150e6 = 32'd28633115 = 32'h01B4_E61B
-        avalon_write(OPCODE_SET_FTW);
-        avalon_write(32'h01B4_E61B);
+        // passing in 1 MHz desired f_out --> FTW = f_out * 2^N/f_ref_clk ==> FTW = 1e6*2^30 / 150e6 = 30'd7158279 = 30'h6D3A07
+        avalon_write({OP_FTW, 30'h6D3A07});
         #100;
+        
+        // 3. Execute an RF Pulse (Duration = 500 clock cycles)
+        avalon_write({OP_PULSE, 30'h1F4});
+        #1000;
 
-        // 3. Execute an RF Pulse (Duration = 500 clock cycles, bit 32 = 1)
-        // instruction word 1: opcode
-        avalon_write(OPCODE_TIMER);
-        // instruction word 2: payload (bit 32 is 1 for db output enable, lower bits define count)
-        avalon_write(32'h8000_01F4);
+        // 4. Configure Phase Offset  (PTW)
+        // passing in 90 degree desired phase_deg --> PTW = (phase_deg * 2^N) / 360 ==> PTW = (90 * 2^30) / 360 = 30'd268435456 = 30'h10000000
+        avalon_write({OP_PTW, 30'h10000000});
+
 
         // Wait in simulation while the hardware countdown executes the pulse 
         // At 150 MHz, 500 cycles is ~3.33 us
-        #4000;
+        #4000;  // 4 us
 
         // 4. Execute a Delay (Duration = 300 clock cycles, bit 32 = 0)
-        avalon_write(OPCODE_TIMER);
-        avalon_write(32'h0000_012C);
+        avalon_write({OP_DELAY, 30'h12C});
 
         // wait for delay to complete
         #3000;
-
-        // try reset
-        rst = 1'b1;
-        #100;
 
         // End Simulation
         $stop;

@@ -9,13 +9,13 @@
 module sine_pac(
     input wire clk_150mhz,      // 150 MHz clock from PLL
     input wire rst,             // master reset switch on-board
-    input wire [31:0] lut_idx,  // sine LUT index set by FTW from the phase accumulator
+    input wire [29:0] lut_idx,  // sine LUT index set by FTW from the phase accumulator
     output reg [9:0] db         // output data bits going into the external DAC
     );
 
     // assign the top 10 MSBs of the LUT index to the output (DAC only has 10 db pins) 
     wire [9:0] lut_addr;
-    assign lut_addr = lut_idx[31:22];
+    assign lut_addr = lut_idx[29:20];
 
     reg [9:0] sine_lut [1023:0];    // defines array of 1024x10 of memory -> "1024 rows of 10 columns of memory"
 

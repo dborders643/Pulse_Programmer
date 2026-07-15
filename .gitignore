@@ -30,3 +30,5 @@ transcript
 *.out
 *.done
 *.summary
+pulse_controller.v
+dds.v

@@ -8,14 +8,14 @@
 module nco(
     input wire clk_150mhz,  // 150 MHz clock generated from PLL
     input wire rst,         // master switch on-board
-    input wire [31:0] ftw,  // 32-bit register sitting in fabric changing from C program
-    input wire [31:0] ptw,  // 32-bit Phase Tuning Word (PTW) from C program
+    input wire [29:0] ftw,  // 30-bit register sitting in fabric changing from C program
+    input wire [29:0] ptw,  // 30-bit Phase Tuning Word (PTW) from C program
     output wire [9:0] db    // 10-bit output going to external DAC (on GPIO pins)
     );
 
     // interconnects
-    wire [31:0] lut_idx;
-    wire [31:0] accumulated_phase;
+    wire [29:0] lut_idx;
+    wire [29:0] accumulated_phase;
 
     // PTW Logic: inject phase offset
     assign lut_idx = accumulated_phase + ptw;

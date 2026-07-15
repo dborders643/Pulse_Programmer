@@ -1,11 +1,12 @@
 // ============================================================================
 // Module Name: platform_interface
-// Description: This module is a custom wrapper. The module does these things:
-//      1. Connects the HPS demands to the pulse sequencer via the light-weight 
-//         AXI bus using an asynchronous FIFO IP block. 
-//      2. Connects the pulse sequencer outputs to the dds to generate the 
+// Description: This module is a custom wrapper. The module does this:
+//      1. Connects the HPS demands to the sequencer via the light-weight 
+//         AXI bus using an asynchronous FIFO IP block.
+//      2. Instantiates the PLL block for 150 MHz operation. 
+//      3. Connects the sequencer outputs to the dds to generate the 
 //         desired pulse.
-//      3. Generates the multiplexer that outputs the data bits into the DAC. 
+//      4. Generates the multiplexer that outputs the data bits into the DAC. 
 // ============================================================================
 `timescale 1ns / 1ps
 module platform_interface(
@@ -25,7 +26,7 @@ module platform_interface(
     wire wrreq_in;
     wire wrfull_out;
     
-    // FIFO <==> Sequencer Dispatcher
+    // FIFO <==> Sequencer
     wire [31:0] q_bus;
     wire rdempty_flag;
     wire rdreq_sig;
@@ -33,30 +34,32 @@ module platform_interface(
     // 150 MHz Clock Routing
     wire clk_150mhz_net;
     
-    // Sequencer <==> DDS
-    wire [31:0] ftw_bus;
-    wire [31:0] ptw_bus;
+    // Sequencer <==> NCO
+    wire [29:0] ftw_bus;
+    wire [29:0] ptw_bus;
     
-    // DDS <==> MUX
-    wire [9:0] dds_db_out;
+    // NCO <==> MUX
+    wire [9:0] nco_db_out;
 
-    // Sequencer <==> Pulse Controller
-    wire [31:0] timer_data_bus;
-    wire timer_start_flag;
-    wire timer_busy_flag;
-
-    // Pulse Controller --> MUX
+    // Sequencer --> MUX
     wire pulse_active_flag;
-    
+
+    // PLL <==> NCO
+    wire locked;
+    wire nco_rst;
+
     // ========================================================
     // Combinational Logic
     // ========================================================
 
     // FIFO Write Gate (Protects against overwriting full FIFO)
     assign wrreq_in = avs_write & ~wrfull_out; 
+
+    // define nco_rst logic: locked needs to be inverted and OR'd with 'rst'
+    assign nco_rst = ~locked | rst;
     
     // Output MUX (If pulse is active, output sine wave. Otherwise, output silence)
-    assign db = pulse_active_flag ? dds_db_out : 10'h1FF;
+    assign db = pulse_active_flag ? nco_db_out : 10'h1FF;
 
     // ========================================================
     // Module Instantiations
@@ -76,37 +79,31 @@ module platform_interface(
     );
 
     // instantiate Sequencer Dispatcher 
-    sequencer_dispatcher u_sequencer_dispatcher(
-        .clk_150mhz  (clk_150mhz_net),
-        .rst         (rst),
-        .q           (q_bus),
-        .rdempty     (rdempty_flag),
-        .timer_busy  (timer_busy_flag),
-        .rdreq       (rdreq_sig),
-        .ftw         (ftw_bus),
-        .ptw         (ptw_bus),
-        .timer_data  (timer_data_bus),
-        .timer_start (timer_start_flag)
-    );
-    
-    // instantiate DDS Core
-    dds u_dds(
-        .clk_50mhz  (clk_50mhz),
+    sequencer sequencer_inst (
+    .clk_150mhz (clk_150mhz_net),
+    .rst        (rst),
+    .rdempty    (rdempty_flag),
+    .q          (q_bus),
+    .rdreq      (rdreq_sig),
+    .ftw        (ftw_bus),
+    .ptw        (ptw_bus),
+    .pulse      (pulse_active_flag)
+  );
+
+    // instantiate IP Catalog PLL module
+    pll_150mhz u_pll_150mhz (
+        .refclk     (clk_50mhz),
         .rst        (rst),
-        .ftw        (ftw_bus),
-        .ptw        (ptw_bus),
-        .db         (dds_db_out),
-        .clk_150mhz (clk_150mhz_net)
-    );
-    
-    // instantiate pulse controller
-    pulse_controller u_pulse_controller(
-        .clk_150mhz   (clk_150mhz_net),
-        .rst          (rst),
-        .timer_start  (timer_start_flag),
-        .timer_data   (timer_data_bus),
-        .timer_busy   (timer_busy_flag),
-        .pulse_active (pulse_active_flag)
+        .outclk_0   (clk_150mhz_net),
+        .locked     (locked)
     );
 
+    // instantiate the NCO module
+    nco  nco_inst (
+    .clk_150mhz (clk_150mhz_net),
+    .rst        (rst),
+    .ftw        (ftw_bus),
+    .ptw        (ptw_bus),
+    .db         (nco_db_out)
+  );
 endmodule

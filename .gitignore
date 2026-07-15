@@ -21,13 +21,12 @@ timing/
 work/
 transcript
 *.wlf
-*.vcd
-
-# IP Blocks
-async_FIFO.v
-pll_150mhz.v
 
 # Other Stuff
 *.out
 *.qsf
 *.qpf
+*.qws
+*.out
+*.done
+*.summary

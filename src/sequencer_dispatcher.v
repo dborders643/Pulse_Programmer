@@ -24,20 +24,18 @@ module sequencer_dispatcher(
     // ========================================================
 
     // FSM encoding
-    localparam IDLE          = 3'd0;
-    localparam FETCH_OPCODE  = 3'd1;
-    localparam DECODE_OPCODE = 3'd2;
-    localparam UPDATE_FTW    = 3'd3;
-    localparam UPDATE_PTW    = 3'd4;
-    localparam UPDATE_TIMER  = 3'd5;
+    localparam IDLE          = 2'd0;
+    localparam UPDATE_FTW    = 2'd1;
+    localparam UPDATE_PTW    = 2'd2;
+    localparam UPDATE_TIMER  = 2'd3;
 
     // Instruction Opcodes (word 1)
-    localparam OP_SET_FTW = 32'h0000_0001;  // prepares dispatcher to send raw packet to ftw register
-    localparam OP_SET_PTW = 32'h0000_0002;  // prepares dispatcher to send raw packet to ptw register
-    localparam OP_TIMER   = 32'h0000_0003;  // prepares dispatcher to send raw packet to timer register
+    localparam OP_SET_FTW   = 32'h0000_0001;  // prepares dispatcher to send raw packet to ftw register
+    localparam OP_SET_PTW   = 32'h0000_0002;  // prepares dispatcher to send raw packet to ptw register
+    localparam OP_SET_TIMER = 32'h0000_0003;  // prepares dispatcher to send raw packet to timer register
 
     // Internal register
-    reg [2:0] state;
+    reg [1:0] state;
 
     // Sequential Logic
     always @(posedge clk_150mhz or posedge rst) begin
@@ -59,32 +57,21 @@ module sequencer_dispatcher(
                     rdreq <= 1'b0;
                     state <= IDLE;
                     if (~rdempty && ~timer_busy) begin
-                        rdreq <= 1'b1;          // pull rdreq high to ask FIFO for data
-                        state <= FETCH_OPCODE; 
+                        if (q == OP_SET_FTW) begin
+                            rdreq <= 1'b1;
+                            state <= UPDATE_FTW;
+                        end else if (q == OP_SET_PTW) begin
+                            rdreq <= 1'b1;
+                            state <= UPDATE_PTW;
+                        end else if (q == OP_SET_TIMER) begin
+                            rdreq <= 1'b1;
+                            state <= UPDATE_TIMER;
+                        end else begin
+                            rdreq <= 1'b1;
+                            state <= IDLE;
+                        end 
                     end
                 end 
-
-                // we need FETCH_OPCODE because the sequencer dispatcher can only take in the one word we want
-                // so 'rdreq' must pull high then pull low immediately out of the IDLE state
-                FETCH_OPCODE: begin
-                    rdreq <= 1'b0;
-                    state <= DECODE_OPCODE;
-                end
-
-                DECODE_OPCODE: begin 
-                    if (q == OP_SET_FTW) begin
-                        rdreq <= 1'b1;          // ask FIFO for FTW payload
-                        state <= UPDATE_FTW;
-                    end else if (q == OP_SET_PTW) begin
-                        rdreq <= 1'b1;          // ask FIFO for PTW payload
-                        state <= UPDATE_PTW;
-                    end else if (q == OP_TIMER) begin
-                        rdreq <= 1'b1;          // ask FIFO for Timer payload
-                        state <= UPDATE_TIMER;
-                    end else begin
-                        state <= IDLE;          // unknown opcode, abort                        
-                    end
-                end
 
                 UPDATE_FTW: begin
                     rdreq <= 1'b0;              // only grab the single word we want

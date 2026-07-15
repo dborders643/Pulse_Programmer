@@ -15,6 +15,7 @@ module platform_interface(
     input wire avs_write,               // avalon write enable
     output [9:0] db                     // 10-bit external DAC output 
     );
+    
     // 
     // ========================================================
     // Internal Interconnect Wires
@@ -47,7 +48,6 @@ module platform_interface(
     // Pulse Controller --> MUX
     wire pulse_active_flag;
     
-
     // ========================================================
     // Combinational Logic
     // ========================================================

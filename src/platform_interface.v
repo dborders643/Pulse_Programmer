@@ -8,13 +8,15 @@
 //         desired pulse.
 //      4. Generates the multiplexer that outputs the data bits into the DAC. 
 // ============================================================================
+//`include "ip_mock_blocks/"
 `timescale 1ns / 1ps
 module platform_interface(
     input wire clk_50mhz,               // 50 MHz crystal oscillator
     input wire rst,                     // on-board reset
     input wire [31:0] avs_write_data,   // 32-bit avalon write data
     input wire avs_write,               // avalon write enable
-    output [9:0] db                     // 10-bit external DAC output 
+    output wire clk_150mhz,             // output 150 MHz clock for external DAC clock
+    output wire [9:0] db                // 10-bit external DAC output 
     );
     
     // 
@@ -61,11 +63,13 @@ module platform_interface(
     // Output MUX (If pulse is active, output sine wave. Otherwise, output silence)
     assign db = pulse_active_flag ? nco_db_out : 10'h1FF;
 
+    assign clk_150mhz = clk_150mhz_net;   // assign output pin
+
     // ========================================================
     // Module Instantiations
     // ========================================================
 
-    // instantiate Asycnhronous FIFO
+    // instantiate Asynchronous FIFO
     async_FIFO u_async_FIFO (
         .aclr   (rst),
         .data   (avs_write_data),

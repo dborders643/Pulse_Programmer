@@ -3,6 +3,10 @@
 // Description:  Wraps modules phase accumulator and sine_pac and also adds
 //               the Phase Tuning Word (PTW), this register offsets the 
 //               the accumulated phase, adding a phase offset. 
+// Notes: port 'phase_rst' is used in the case where an experiment wants to 
+//        pulse with delays and wants a precise phase for each pulse. This is 
+//        required as the architecture of the NCO is constantly calculating the 
+//        output so 'phase_rst' clears the accumulated phase for the next cycle.
 // ============================================================================
 `timescale 1ns / 1ps
 module nco(
@@ -12,7 +16,7 @@ module nco(
     input wire [29:0] ptw,  // 30-bit Phase Tuning Word (PTW) from C program
     output wire [9:0] db    // 10-bit output going to external DAC (on GPIO pins)
     );
-
+    // TODO: include 'phase_rst' logic
     // interconnects
     wire [29:0] lut_idx;
     wire [29:0] accumulated_phase;

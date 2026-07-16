@@ -2,24 +2,25 @@
 // Module Name: platform_interface
 // Description: This module is a custom wrapper. The module does this:
 //      1. Connects the HPS demands to the sequencer via the light-weight 
-//         AXI bus using an asynchronous FIFO IP block.
+//         AXI bus using an asynchronous FIFO IP block (in show ahead mode).
 //      2. Instantiates the PLL block for 150 MHz operation. 
 //      3. Connects the sequencer outputs to the dds to generate the 
 //         desired pulse.
 //      4. Generates the multiplexer that outputs the data bits into the DAC. 
 // ============================================================================
-//`include "ip_mock_blocks/"
 `timescale 1ns / 1ps
 module platform_interface(
     input wire clk_50mhz,               // 50 MHz crystal oscillator
     input wire rst,                     // on-board reset
     input wire [31:0] avs_write_data,   // 32-bit avalon write data
     input wire avs_write,               // avalon write enable
+    input wire [31:0] avs_addr,         // incoming HPS input
     output wire clk_150mhz,             // output 150 MHz clock for external DAC clock
+    output wire trigger,                // output trigger for the oscilloscope to synchronize oscilloscope reading and RF pulses
     output wire [9:0] db                // 10-bit external DAC output 
     );
     
-    // 
+    // TODO: write run_enable logic with avs_addr input
     // ========================================================
     // Internal Interconnect Wires
     // ========================================================
@@ -82,7 +83,8 @@ module platform_interface(
         .wrfull (wrfull_out)
     );
 
-    // instantiate Sequencer Dispatcher 
+    // TODO: update ports for sequencer
+    // instantiate Sequencer 
     sequencer sequencer_inst (
     .clk_150mhz (clk_150mhz_net),
     .rst        (rst),
@@ -102,6 +104,7 @@ module platform_interface(
         .locked     (locked)
     );
 
+    // TODO: update ports to match phase_rst
     // instantiate the NCO module
     nco  nco_inst (
     .clk_150mhz (clk_150mhz_net),

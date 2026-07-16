@@ -10,9 +10,12 @@ module sequencer(
     input wire rst,         // on-board master reset
     input wire rdempty,     // tells if the async FIFO block is empty
     input wire [31:0] q,    // raw data from the async FIFO module
-    output reg rdreq,       // lets the async FIFO block know the sequencer wants to read 
+    input wire run_enable,  // input from 'avs_addr' to start FSM
+    output reg rdreq,       // acknowledges q to be sent (FIFO is in show-ahead mode)
     output reg [29:0] ftw,  // output ftw value directed into the NCO
     output reg [29:0] ptw,  // output ptw value directed into the NCO
+    output reg phase_rst,   // output trigger to reset phase before pulse on NCO
+    output reg trigger,     // output trigger on external board to sync up oscilloscope
     output reg pulse        // output enable to pulse NCO to GPIO output pins
     );
 
@@ -20,6 +23,7 @@ module sequencer(
     // Moore Finite State Machine (FSM)
     // ========================================================
 
+    // TODO: update FSM and logic to include macros
     // FSM encoding
     localparam IDLE = 3'b000;
     localparam SET_FTW = 3'b001;

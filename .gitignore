@@ -32,3 +32,5 @@ transcript
 *.summary
 pulse_controller.v
 dds.v
+pll_150mhz.v
+async_FIFO.v

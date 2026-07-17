@@ -14,9 +14,10 @@ module nco(
     input wire rst,         // master switch on-board
     input wire [29:0] ftw,  // 30-bit register sitting in fabric changing from C program
     input wire [29:0] ptw,  // 30-bit Phase Tuning Word (PTW) from C program
+    input phase_rst,        // phase reset from sequencer
     output wire [9:0] db    // 10-bit output going to external DAC (on GPIO pins)
     );
-    // TODO: include 'phase_rst' logic
+
     // interconnects
     wire [29:0] lut_idx;
     wire [29:0] accumulated_phase;
@@ -29,6 +30,7 @@ module nco(
         .clk_150mhz         (clk_150mhz),
         .rst                (rst),
         .ftw                (ftw),
+        .phase_rst          (phase_rst),
         .accumulated_phase  (accumulated_phase)
     );
 

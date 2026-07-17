@@ -16,7 +16,7 @@ module sequencer(
     output reg [29:0] ptw,  // output ptw value directed into the NCO
     output reg phase_rst,   // output trigger to reset phase before pulse on NCO
     output reg trigger,     // output trigger on external board to sync up oscilloscope
-    output reg pulse        // output enable to pulse NCO to GPIO output pins
+    output reg pulse        // enable to pulse NCO to GPIO output pins
     );
 
     // ========================================================
@@ -24,12 +24,12 @@ module sequencer(
     // ========================================================
 
     // TODO: update FSM and logic to include macros
+    // PERF: ^ (finished)
     // FSM encoding
-    localparam IDLE = 3'b000;
-    localparam SET_FTW = 3'b001;
-    localparam SET_PTW = 3'b010;
-    localparam SET_PULSE = 3'b011;
-    localparam SET_DELAY = 3'b100;
+    localparam IDLE          = 2'b00;       // FSM stands still until software pulls 'run_enable' high
+    localparam START_TRIGGER = 2'b01;       // pulls an external wire high presummably hooked up to an o-scope for probing
+    localparam DECODE        = 2'b10;       // decodes word into a ftw, ptw, pulse, or delay
+    localparam COUNTDOWN     = 2'b11;       // counts down the pulse or delay data
 
     // Instruction Opcodes
     localparam OP_FTW   = 2'b00;
@@ -42,7 +42,7 @@ module sequencer(
     wire [29:0] data = q[29:0];
 
     // Internal register
-    reg [2:0] state;
+    reg [1:0] state;
     reg [29:0] timer;
 
     // Sequential Logic
@@ -54,69 +54,89 @@ module sequencer(
             ftw <= 30'd0;
             ptw <= 30'd0;
             timer <= 30'd0;
+            phase_rst <= 1'b0;
+            trigger <= 1'b0;
             pulse <= 1'b0;
         end else begin
             case(state)
                 IDLE: begin
                     state <= IDLE;
+                    rdreq <= 1'b0;
+                    phase_rst <= 1'b0;
+                    trigger <= 1'b0;
+                    if (~rdempty && run_enable) begin
+                        state <= START_TRIGGER;
+                    end
+                end
+
+                START_TRIGGER: begin
+                    rdreq <= 1'b0;
+                    phase_rst <= 1'b0;
+                    trigger <= 1'b1;
+                    state <= DECODE;
+                end
+
+                DECODE: begin
+                    trigger <= 1'b0;
+                    // acknowledge word consumption
                     if (~rdempty) begin
                         rdreq <= 1'b1;
-                        case(tag)
-                            OP_FTW:   state <= SET_FTW;
-                            OP_PTW:   state <= SET_PTW;
-                            OP_PULSE: state <= SET_PULSE;
-                            OP_DELAY: state <= SET_DELAY;
-                        endcase
+                    end
+                    // Decode OPCODES
+                    case(tag)
+                        OP_FTW: begin
+                            ftw <= data;
+                            phase_rst <= 1'b0;
+                            pulse <= 1'b0;
+                            if (~rdempty) begin
+                                state <= DECODE;
+                            end else begin
+                                state <= IDLE;
+                            end
+                        end
+
+                        OP_PTW: begin
+                            ptw <= data;
+                            phase_rst <= 1'b0;
+                            pulse <= 1'b0;
+                            if (~rdempty) begin
+                                state <= DECODE;
+                            end else begin
+                                state <= IDLE;
+                            end
+                        end
+
+                        OP_PULSE: begin
+                            timer <= data;
+                            phase_rst <= 1'b1;
+                            pulse <= 1'b1;
+                            state <= COUNTDOWN;
+                        end
+
+                        OP_DELAY: begin
+                            timer <= data;
+                            phase_rst <= 1'b1;
+                            pulse <= 1'b0;
+                            state <= COUNTDOWN;
+                        end
+                    endcase
+                end
+
+                COUNTDOWN: begin
+                    rdreq <= 1'b0;
+                    phase_rst <= 1'b0;
+                    trigger <= 1'b0;
+                    if (timer >= 30'd1) begin
+                        timer <= timer - 30'd1;
+                        state <= COUNTDOWN;
                     end else begin
-                        rdreq <= 1'b0;
+                        if (~rdempty) begin
+                            state <= DECODE;
+                        end else begin
+                            state <= IDLE;
+                        end
                     end
                 end 
-
-                SET_FTW: begin
-                    rdreq <= 1'b0;
-                    ftw <= data;
-                    state <= IDLE;
-                end
-
-                SET_PTW: begin
-                    rdreq <= 1'b0;
-                    ptw <= data;
-                    state <= IDLE;
-                end
-
-                SET_PULSE: begin
-                    rdreq <= 1'b0;
-                    pulse <= 1'b1;
-
-                    // Load timer on the first clock cycle of this state
-                    if (timer == 30'd0) begin
-                        timer <= data;
-                    end
-                    // count down every clock cycle until clock hits zero
-                    else if (timer == 30'd1) begin
-                        timer <= 30'd0;
-                        pulse <= 1'b0;
-                        state <= IDLE;
-                    end else begin
-                        timer <= timer - 1'b1;
-                    end
-                end
-
-                SET_DELAY: begin
-                    rdreq <= 1'b0;
-                    pulse <= 1'b0;
-
-                    if (timer == 30'd0) begin
-                        timer <= data;
-                    end else if (timer == 30'd1) begin
-                        timer <= 30'd0;
-                        state <= IDLE;
-                    end else begin
-                        timer <= timer - 1'b1;
-                    end
-                end
-
-                default: state <= IDLE;
             endcase
         end
     end

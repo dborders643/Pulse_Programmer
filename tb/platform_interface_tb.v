@@ -89,34 +89,24 @@ module platform_interface_tb();
         // 2. Configure Frequency (FTW)
         // passing in 1 MHz desired f_out --> FTW = f_out * 2^N/f_ref_clk ==> FTW = 1e6*2^30 / 150e6 = 30'd7158279 = 30'h6D3A07
         avalon_write_FIFO({OP_FTW, 30'h6D3A07});
-        #200;
 
         // 3. Load RF Pulse (Duration = 500 clock cycles)
         avalon_write_FIFO({OP_PULSE, 30'h1F4});
-        #200;
-
-        // 4. Configure Phase Offset  (PTW)
-        // passing in 90 degree desired phase_deg --> PTW = (phase_deg * 2^N) / 360 ==> PTW = (90 * 2^30) / 360 = 30'd268435456 = 30'h10000000
-        // avalon_write({OP_PTW, 30'h10000000});
-
-
-        // Wait in simulation while the hardware countdown executes the pulse 
-        // At 150 MHz, 500 cycles is ~3.33 us
-        //#4000;  // 4 us
 
         // 4. Load Delay (Duration = 300 clock cycles, bit 32 = 0)
         avalon_write_FIFO({OP_DELAY, 30'h12C});
-        #200;
         
         // 5. Reconfigure Frequency (FTW)
-        avalon_write_FIFO({OP_FTW,30'h4444444});
-        #200;
+        avalon_write_FIFO({OP_FTW,30'h11111111});
 
-        // 6. Pulse one more time
+        // 6. Configure Phase Offset  (PTW)
+        // passing in 90 degree desired phase_deg --> PTW = (phase_deg * 2^N) / 360 ==> PTW = (90 * 2^30) / 360 = 30'd268435456 = 30'h10000000
+        avalon_write_FIFO({OP_PTW, 30'h10000000});
+
+        // 7. Pulse one more time
         avalon_write_FIFO({OP_PULSE, 30'h1F4});
-        #200;
 
-        // 7. Start Experiment
+        // 8. Start Experiment
         avalon_write_control(32'd1); 
 
         // wait for experiment to complete

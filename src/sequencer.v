@@ -69,7 +69,7 @@ module sequencer(
                 end
 
                 START_TRIGGER: begin
-                    rdreq <= 1'b0;
+                    rdreq <= 1'b1;
                     phase_rst <= 1'b0;
                     trigger <= 1'b1;
                     state <= DECODE;
@@ -77,52 +77,48 @@ module sequencer(
 
                 DECODE: begin
                     trigger <= 1'b0;
-                    // acknowledge word consumption
-                    if (~rdempty) begin
-                        rdreq <= 1'b1;
+                    phase_rst <= 1'b1;
+                    if (rdreq & ~rdempty) begin
+                        case(tag)
+                            OP_FTW: begin
+                                ftw <= data;
+                                pulse <= 1'b0;
+                                if (~rdempty) begin
+                                    state <= DECODE;
+                                    rdreq <= 1'b1;
+                                end else begin
+                                    state <= IDLE;
+                                end
+                            end
+
+                            OP_PTW: begin
+                                ptw <= data;
+                                pulse <= 1'b0;
+                                if (~rdempty) begin
+                                    state <= DECODE;
+                                    rdreq <= 1'b1;
+                                end else begin
+                                    state <= IDLE;
+                                end
+                            end
+
+                            OP_PULSE: begin
+                                timer <= data;
+                                pulse <= 1'b1;
+                                rdreq <= 1'b0;
+                                state <= COUNTDOWN;
+                            end
+
+                            OP_DELAY: begin
+                                timer <= data;
+                                pulse <= 1'b0;
+                                rdreq <= 1'b0;
+                                state <= COUNTDOWN;
+                            end
+                        endcase
                     end else begin
-                        rdreq <= 1'b0;
+                        state <= IDLE;
                     end
-                    // Decode OPCODES
-                    case(tag)
-                        OP_FTW: begin
-                            ftw <= data;
-                            phase_rst <= 1'b0;
-                            pulse <= 1'b0;
-                            if (~rdempty) begin
-                                state <= DECODE;
-                            end else begin
-                                state <= IDLE;
-                            end
-                        end
-
-                        OP_PTW: begin
-                            ptw <= data;
-                            phase_rst <= 1'b0;
-                            pulse <= 1'b0;
-                            if (~rdempty) begin
-                                state <= DECODE;
-                            end else begin
-                                state <= IDLE;
-                            end
-                        end
-
-                        OP_PULSE: begin
-                            timer <= data;
-                            phase_rst <= 1'b1;
-                            pulse <= 1'b1;
-                            rdreq <= 1'b0;
-                            state <= COUNTDOWN;
-                        end
-
-                        OP_DELAY: begin
-                            timer <= data;
-                            phase_rst <= 1'b1;
-                            pulse <= 1'b0;
-                            rdreq <= 1'b0;
-                            state <= COUNTDOWN;
-                        end
-                    endcase
                 end
 
                 COUNTDOWN: begin
@@ -135,6 +131,7 @@ module sequencer(
                     end else begin
                         if (~rdempty) begin
                             state <= DECODE;
+                            rdreq <= 1'b1;
                         end else begin
                             state <= IDLE;
                         end

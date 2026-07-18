@@ -80,6 +80,8 @@ module sequencer(
                     // acknowledge word consumption
                     if (~rdempty) begin
                         rdreq <= 1'b1;
+                    end else begin
+                        rdreq <= 1'b0;
                     end
                     // Decode OPCODES
                     case(tag)

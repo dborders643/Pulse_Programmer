@@ -23,8 +23,6 @@ module sequencer(
     // Moore Finite State Machine (FSM)
     // ========================================================
 
-    // TODO: update FSM and logic to include macros
-    // PERF: ^ (finished)
     // FSM encoding
     localparam IDLE          = 2'b00;       // FSM stands still until software pulls 'run_enable' high
     localparam START_TRIGGER = 2'b01;       // pulls an external wire high presummably hooked up to an o-scope for probing
@@ -64,6 +62,7 @@ module sequencer(
                     rdreq <= 1'b0;
                     phase_rst <= 1'b0;
                     trigger <= 1'b0;
+                    pulse <= 1'b0;
                     if (~rdempty && run_enable) begin
                         state <= START_TRIGGER;
                     end
@@ -110,6 +109,7 @@ module sequencer(
                             timer <= data;
                             phase_rst <= 1'b1;
                             pulse <= 1'b1;
+                            rdreq <= 1'b0;
                             state <= COUNTDOWN;
                         end
 
@@ -117,6 +117,7 @@ module sequencer(
                             timer <= data;
                             phase_rst <= 1'b1;
                             pulse <= 1'b0;
+                            rdreq <= 1'b0;
                             state <= COUNTDOWN;
                         end
                     endcase

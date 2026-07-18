@@ -75,7 +75,7 @@ module platform_interface(
     if (local_rst) begin
       sync_1 <= 1'b0;
       sync_2 <= 1'b0;
-    end else if (run_en_write) begin
+    end else begin
       sync_1 <= run_enable;
       sync_2 <= sync_1;
     end

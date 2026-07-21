@@ -1,0 +1,38 @@
+# ==========================================
+# Quartus & Qsys Build / Temp Folders
+# ==========================================
+/.qsys_edit/
+/computersystem/
+/db/
+/greybox_tmp/
+/incremental_db/
+/ip/
+/output_files/
+/simulation/
+/hps_isw_handoff/
+
+# ==========================================
+# Generated Reports & Dump Files
+# ==========================================
+c5_pin_model_dump.txt
+hps_sdram_p0_all_pins.txt
+hps_sdram_p0_summary.csv
+pulse_programmer_nativelink_simulation.rpt
+pulse_programmer.htm
+pulse_programmer_assignment_defaults.qdf
+*.v.bak
+
+# ==========================================
+# Quartus Output & Programming Binaries
+# ==========================================
+*.sof
+*.pof
+*.rbf
+*.rpt
+*.summary
+*.smsg
+
+# ==========================================
+# Generated System Info (Regenerates on compile)
+# ==========================================
+*.sopinfo

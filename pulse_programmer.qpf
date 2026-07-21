@@ -1,0 +1,6 @@
+DATE = "22:35:20 July 20, 2026"
+QUARTUS_VERSION = "13.0"
+
+# Revisions
+
+PROJECT_REVISION = "pulse_programmer"

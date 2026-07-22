@@ -37,4 +37,7 @@ pulse_programmer_assignment_defaults.qdf
 # ==========================================
 *.sopinfo
 
+# Python Stuff
 .vscode
+__pycache__/
+*.pyc

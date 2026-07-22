@@ -36,3 +36,5 @@ pulse_programmer_assignment_defaults.qdf
 # Generated System Info (Regenerates on compile)
 # ==========================================
 *.sopinfo
+
+.vscode

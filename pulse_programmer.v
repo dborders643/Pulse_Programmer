@@ -6,25 +6,29 @@
 module pulse_programmer(
 
 	//////////// ADC //////////
-	output		          		ADC_CONVST,
-	output		          		ADC_DIN,
-	input 		          		ADC_DOUT,
-	output		          		ADC_SCLK,
+	//output		          		ADC_CONVST,
+	//output		          		ADC_DIN,
+	//input 		          		ADC_DOUT,
+	//output		          		ADC_SCLK,
+	// might use ADC later but don't need it right now
 
 	//////////// CLOCK //////////
-	input 		          		CLOCK2_50,
-	input 		          		CLOCK3_50,
-	input 		          		CLOCK4_50,
+	//input 		          		CLOCK2_50,
+	//input 		          		CLOCK3_50,
+	//input 		          		CLOCK4_50,
+	// don't need that many clocks
 	input 		          		CLOCK_50,
 
 	//////////// KEY //////////
-	input 		     [3:0]		KEY,
+	//input 		     [3:0]		KEY,
+	// only need one KEY for reset
+	input 						KEY,
 
-	//////////// UART (revH or later only) //////////
-	input 		          		UART_CTS,
-	output		          		UART_RTS,
-	input 		          		UART_RX,
-	output		          		UART_TX,
+	//////////// Custom Outputs //////////
+	output 			[9:0] 		db,				// 10-bit output going into DAC
+	output 			[2:0]		vgnd,			// virtual grounds for RF shielding
+	output 						trigger,		// trigger for o-scope
+	output						clk_150mhz, 	// 150 MHz DAC clock
 
 	//////////// HPS //////////
 	inout 		          		HPS_CONV_USB_N,
@@ -78,10 +82,7 @@ module pulse_programmer(
 	inout 		     [7:0]		HPS_USB_DATA,
 	input 		          		HPS_USB_DIR,
 	input 		          		HPS_USB_NXT,
-	output		          		HPS_USB_STP,
-
-	//////////// GPIO_0, GPIO_0 connect to GPIO Default //////////
-	inout 		    [35:0]		dbGPIO
+	output		          		HPS_USB_STP
 );
 
 
@@ -90,9 +91,6 @@ module pulse_programmer(
 //  REG/WIRE declarations
 //=======================================================
 
-	wire clk_150mhz;
-	wire trigger;
-
 //=======================================================
 //  Structural coding
 //=======================================================
@@ -100,7 +98,7 @@ module pulse_programmer(
 	computersystem u0 (
 		// Clock & Reset
 		.clk_clk                          (CLOCK_50),          // 50MHz board oscillator
-		.reset_reset_n                    (KEY[0]),            // Key 0 acts as system reset (active low)
+		.reset_reset_n                    (KEY),               // Key 0 acts as system reset (active low)
 
 		// HPS Memory (DDR3)
 		.memory_mem_a                     (HPS_DDR3_ADDR),
@@ -149,9 +147,10 @@ module pulse_programmer(
 		// Custom Pulse Programmer Outputs
 		.pp_out_clk_150mhz_out           (clk_150mhz),
 		.pp_out_trigger_out              (trigger),
-		.pp_out_db_out                   (dbGPIO)  // Routes pulse outputs to GPIO expansion header
+		.pp_out_db_out                   (db)
 	);
 
-
+	// drive RF grounds to 0V
+	assign vgnd[2:0] = 1'b0;
 
 endmodule

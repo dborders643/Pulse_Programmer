@@ -41,7 +41,6 @@ mock: | $(BIN_DIR)
 # 3. Generate sequence.bin and move it into sw/bin/
 sequence: | $(BIN_DIR)
 	python3 sw/compiler/test.py
-	mv sequence.bin $(SEQUENCE_BIN)
 
 # 4. Automate the entire Local Test Pipeline
 test: sequence mock

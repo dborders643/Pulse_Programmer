@@ -41,3 +41,7 @@ pulse_programmer_assignment_defaults.qdf
 .vscode
 __pycache__/
 *.pyc
+test.py
+
+# output file
+*.bin

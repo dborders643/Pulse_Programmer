@@ -27,8 +27,8 @@ class Compiler:
         self.OP_PULSE = 0x2 # 2'b10
         self.OP_DELAY = 0x3 # 2'b11
 
-    def compile(self, sequence, output_filename="sequence.bin"):
-        """Takes a Sequence instance and compiles it to binary."""
+    def _get_words(self, sequence):
+        """Internal helper method to compile sequence commands into 32-bit words."""
         compiled_words = []
         op_mask = 0x3
         val_mask = 0x3FFF_FFFF  # 30-bit mask (bits 29:0)
@@ -60,6 +60,12 @@ class Compiler:
             word32 = ((opcode & op_mask) << 30) | (val & val_mask)
             compiled_words.append(word32)
 
+        return compiled_words
+
+    def compile(self, sequence, output_filename="sequence.bin"):
+        """Takes a Sequence instance and compiles it to binary"""
+        compiled_words = self._get_words(sequence)
+
         # --- WRITE TO BINARY FILE ---
         with open(output_filename, "wb") as f:
             for word in compiled_words:
@@ -67,3 +73,29 @@ class Compiler:
 
         print(f"Success! Compiled {len(compiled_words)} instructions to {output_filename}")
         return compiled_words
+
+    def print_debug(self, sequence):
+        """Prints a human-readable bit breakdown of each instruction."""
+        op_names = {0: 'FREQ ', 1: 'PHS  ', 2: 'PULSE', 3: 'DELAY'}
+        
+        # Get compiled 32-bit words cleanly
+        compiled_words = self._get_words(sequence)
+
+        print("\n" + "="*76)
+        print(f"{'IDX':<3} | {'TYPE':<5} | {'OP(31:30)':<9} | {'VALUE BITS (29:0)':<37} | {'RAW HEX'}")
+        print("="*76)
+
+        for i, word in enumerate(compiled_words):
+            opcode = (word >> 30) & 0x3
+            val = word & 0x3FFF_FFFF
+            
+            # Format bits
+            op_bin  = f"{opcode:02b}"
+            val_bin = f"{val:030b}"
+            
+            # Group 30-bit value into clean 4-bit nibbles for visual
+            val_formatted = f"{val_bin[:2]} {val_bin[2:6]} {val_bin[6:10]} {val_bin[10:14]} {val_bin[14:18]} {val_bin[18:22]} {val_bin[22:26]} {val_bin[26:]}"
+
+            print(f"#{i:<2} | {op_names[opcode]} | {op_bin:<9} | {val_formatted:<33} | 0x{word:08X}")
+            
+        print("="*76 + "\n")

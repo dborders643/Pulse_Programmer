@@ -45,3 +45,4 @@ test.py
 
 # output file
 *.bin
+bin/

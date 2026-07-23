@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Writing sequence to FPGA BRAM...\n");
-    if (fpga_laod_bram(sequence_data, word_count) != 0) {
+    if (fpga_load_bram(sequence_data, word_count) != 0) {
         fpga_cleanup();
         free(sequence_data);
         return EXIT_FAILURE;

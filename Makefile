@@ -1,44 +1,54 @@
 # ============================================================================
-# TOOLCHAINS & TARGETS
+# DIRECTORIES & TARGETS
 # ============================================================================
-# Cross-compiler for the physical ARM FPGA board
-CC_ARM := arm-none-linux-gnueabihf-gcc
-TARGET_ARM := runner
+BIN_DIR := sw/bin
 
-# Native compiler for your local Windows PC (via SoC EDS Shell)
-CC_PC := gcc
-TARGET_MOCK := local_runner
+# Executable Targets
+TARGET_ARM := $(BIN_DIR)/runner
+TARGET_MOCK := $(BIN_DIR)/local_runner
+SEQUENCE_BIN := $(BIN_DIR)/sequence.bin
+
+# Toolchains
+CC_ARM := "C:/Program Files (x86)/Arm/GNU Toolchain mingw-w64-i686-arm-none-linux-gnueabihf/bin/arm-none-linux-gnueabihf-gcc.exe"
+CC_PC  := gcc
 
 # Source files
-SRCS := driver.c runner.c
-INCLUDES := -I.
+SRCS := sw/driver/driver.c sw/driver/runner.c
+INCLUDES := -Isw/driver
+
+# Compiler Flags
+CFLAGS := -std=c99
 
 # ============================================================================
 # MAKE RULES
 # ============================================================================
-# Default command if you just type 'make'
 all: arm
 
+# Helper rule to ensure the bin directory exists before building
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
 # 1. Compile for the Real FPGA Board (ARM)
-arm:
-	$(CC_ARM) $(SRCS) $(INCLUDES) -o $(TARGET_ARM)
+arm: | $(BIN_DIR)
+	$(CC_ARM) $(CFLAGS) $(SRCS) $(INCLUDES) -o $(TARGET_ARM)
 	@echo "Success: Built '$(TARGET_ARM)' for ARM hardware."
 
 # 2. Compile for Local PC Testing (Mock)
-mock:
-	$(CC_PC) $(SRCS) $(INCLUDES) -o $(TARGET_MOCK)
+mock: | $(BIN_DIR)
+	$(CC_PC) $(CFLAGS) $(SRCS) $(INCLUDES) -o $(TARGET_MOCK)
 	@echo "Success: Built '$(TARGET_MOCK)' for local PC testing."
 
-# 3. Generate the sequence.bin using your Python assembler
-sequence:
-	python test.py
+# 3. Generate sequence.bin and move it into sw/bin/
+sequence: | $(BIN_DIR)
+	python3 sw/compiler/test.py
+	mv sequence.bin $(SEQUENCE_BIN)
 
 # 4. Automate the entire Local Test Pipeline
 test: sequence mock
 	@echo "\n--- RUNNING MOCK TEST ---"
-	./$(TARGET_MOCK) sequence.bin
+	./$(TARGET_MOCK) $(SEQUENCE_BIN)
 
 # 5. Clean up all generated files
 clean:
-	rm -f $(TARGET_ARM) $(TARGET_MOCK) sequence.bin test_run.bin
-	@echo "Cleaned up all compiled binaries."
+	rm -rf $(BIN_DIR) test_run.bin
+	@echo "Cleaned up all compiled binaries and the output directory."

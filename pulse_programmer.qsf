@@ -30,16 +30,16 @@ set_location_assignment PIN_AA14 -to KEY
 #============================================================
 
 # Data Bus (db[9:0])
-set_location_assignment PIN_AC18 -to db[9]
-set_location_assignment PIN_Y17 -to db[8]
-set_location_assignment PIN_AD17 -to db[7]
-set_location_assignment PIN_AK16 -to db[6]
-set_location_assignment PIN_AK18 -to db[5]
-set_location_assignment PIN_AK19 -to db[4]
-set_location_assignment PIN_AJ17 -to db[3]
-set_location_assignment PIN_AJ16 -to db[2]
-set_location_assignment PIN_AH18 -to db[1]
-set_location_assignment PIN_AH17 -to db[0]
+set_location_assignment PIN_AH17 -to db[9]
+set_location_assignment PIN_AH18 -to db[8]
+set_location_assignment PIN_AJ16 -to db[7]
+set_location_assignment PIN_AJ17 -to db[6]
+set_location_assignment PIN_AK19 -to db[5]
+set_location_assignment PIN_AK18 -to db[4]
+set_location_assignment PIN_AK16 -to db[3]
+set_location_assignment PIN_AD17 -to db[2]
+set_location_assignment PIN_Y17 -to db[1]
+set_location_assignment PIN_AC18 -to db[0]
 
 # Clocks & Triggers
 set_location_assignment PIN_AG16 -to clk_150mhz

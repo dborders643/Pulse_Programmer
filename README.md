@@ -1,6 +1,6 @@
-# Custom FPGA Pulse Programmer & Direct Digital Synthesizer (DDS)
+# Low-Cost RFSoC Control Platform
 
-This repository contains the Verilog HDL source code and companion C/Python software stack for a custom FPGA-based Pulse Programmer and Direct Digital Synthesizer (DDS). The system is designed to receive high-level instructions from a Hard Processor System (HPS) via a lightweight AXI bus, decode them in real-time, and generate phase-coherent, precisely timed RF pulses.
+This repository contains the Verilog HDL source code and companion C/Python software stack for a low-cost SoC/FPGA control platform for high-precision RF pulse sequencing and quantum state manipulation. The system is designed to receive high-level instructions from a Hard Processor System (HPS) via a lightweight AXI bus, decode them in real-time, and generate phase-coherent, precisely timed RF pulses.
 
 ---
 

@@ -1,7 +1,7 @@
 // ==========================================================================================================================================================
 // Module Name: sequencer
 // Description: This module is the brains of the instruction set decomposition. This module is a FSM that splices the incoming data 'q' into 2 pieces. The 
-//              first is a 2-bit opcode called 'tag' which tells the FSM what type of data to expect. The other 30 bits are the raw data which contain either
+//              first is a 3-bit opcode called 'tag' which tells the FSM what type of data to expect. The other 29 bits are the raw data which contain either
 //              a ftw, ptw, or timer (in clock cycles) value. The sequencer is tied to the asynchronous FIFO and output multiplexer.  
 // ==========================================================================================================================================================
 `timescale 1ns / 1ps
@@ -12,8 +12,9 @@ module sequencer(
     input wire [31:0] q,    // raw data from the async FIFO module
     input wire run_enable,  // input from 'avs_addr' to start FSM
     output reg rdreq,       // acknowledges q to be sent (FIFO is in show-ahead mode)
-    output reg [29:0] ftw,  // output ftw value directed into the NCO
-    output reg [29:0] ptw,  // output ptw value directed into the NCO
+    output reg [28:0] ftw,  // output ftw value directed into the NCO
+    output reg [28:0] ptw,  // output ptw value directed into the NCO
+    output reg [28:0] atw,  // output atw value directed into the NCO
     output reg phase_rst,   // output trigger to reset phase before pulse on NCO
     output reg trigger,     // output trigger on external board to sync up oscilloscope
     output reg pulse        // enable to pulse NCO to GPIO output pins
@@ -30,18 +31,19 @@ module sequencer(
     localparam COUNTDOWN     = 2'b11;       // counts down the pulse or delay data
 
     // Instruction Opcodes
-    localparam OP_FTW   = 2'b00;
-    localparam OP_PTW   = 2'b01;
-    localparam OP_PULSE = 2'b10;
-    localparam OP_DELAY = 2'b11;
+    localparam OP_FTW   = 3'b000;
+    localparam OP_PTW   = 3'b001;
+    localparam OP_ATW   = 3'b010;
+    localparam OP_PULSE = 3'b011;
+    localparam OP_DELAY = 3'b100;
     
-    // data slicing ==> 32-bit input == 2-bit tag OPCODE || 30-bit data
-    wire [1:0] tag = q[31:30];
-    wire [29:0] data = q[29:0];
+    // data slicing ==> 32-bit input == 3-bit tag OPCODE || 29-bit data
+    wire [2:0] tag = q[31:29];
+    wire [28:0] data = q[28:0];
 
     // Internal register
     reg [1:0] state;
-    reg [29:0] timer;
+    reg [28:0] timer;
 
     // Sequential Logic
     always @(posedge clk_150mhz or posedge rst) begin
@@ -49,9 +51,10 @@ module sequencer(
             // reset all states and safely mute the RF pulse
             state <= IDLE;
             rdreq <= 1'b0;
-            ftw <= 30'd0;
-            ptw <= 30'd0;
-            timer <= 30'd0;
+            ftw <= 29'd0;
+            ptw <= 29'd0;
+            atw <= 29'b0;
+            timer <= 29'd0;
             phase_rst <= 1'b0;
             trigger <= 1'b0;
             pulse <= 1'b0;
@@ -102,6 +105,17 @@ module sequencer(
                                 end
                             end
 
+                            OP_ATW: begin
+                                atw <= data;
+                                pulse <= 1'b0;
+                                if (~rdempty) begin
+                                    state <= DECODE;
+                                    rdreq <= 1'b1;
+                                end else begin
+                                    state <= IDLE;
+                                end
+                            end
+
                             OP_PULSE: begin
                                 timer <= data;
                                 pulse <= 1'b1;
@@ -125,8 +139,8 @@ module sequencer(
                     rdreq <= 1'b0;
                     phase_rst <= 1'b0;
                     trigger <= 1'b0;
-                    if (timer >= 30'd1) begin
-                        timer <= timer - 30'd1;
+                    if (timer >= 29'd1) begin
+                        timer <= timer - 29'd1;
                         state <= COUNTDOWN;
                     end else begin
                         if (~rdempty) begin

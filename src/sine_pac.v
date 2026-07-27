@@ -7,15 +7,15 @@
 // ============================================================================
 `timescale 1ns / 1ps
 module sine_pac(
-    input wire clk_150mhz,      // 150 MHz clock from PLL
-    input wire rst,             // master reset switch on-board
-    input wire [29:0] lut_idx,  // sine LUT index set by FTW from the phase accumulator
-    output reg [9:0] db         // output data bits going into the external DAC
+    input wire clk_150mhz,              // 150 MHz clock from PLL
+    input wire rst,                     // master reset switch on-board
+    input wire [28:0] lut_idx,          // sine LUT index set by FTW from the phase accumulator
+    output reg signed  [9:0] lut_out    // output data bits going into the external DAC
     );
 
     // assign the top 10 MSBs of the LUT index to the output (DAC only has 10 db pins) 
     wire [9:0] lut_addr;
-    assign lut_addr = lut_idx[29:20];
+    assign lut_addr = lut_idx[28:19];
 
     reg [9:0] sine_lut [1023:0];    // defines array of 1024x10 of memory -> "1024 rows of 10 columns of memory"
 
@@ -25,9 +25,9 @@ module sine_pac(
 
     always@(posedge clk_150mhz or posedge rst) begin
         if (rst) begin
-            db <= 10'h1FF;          // using centered sine LUT so 1FF == 0, min=0x000, max=0x3FF, mean=0x1FF
+            lut_out <= 10'h000;          // using two's complement so range is [-512,511]
         end else begin
-            db <= sine_lut[lut_addr];
+            lut_out <= sine_lut[lut_addr];
         end
     end
 

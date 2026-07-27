@@ -3,24 +3,21 @@
 // Description:  Wraps modules phase accumulator and sine_pac and also adds
 //               the Phase Tuning Word (PTW), this register offsets the 
 //               the accumulated phase, adding a phase offset. 
-// Notes: port 'phase_rst' is used in the case where an experiment wants to 
-//        pulse with delays and wants a precise phase for each pulse. This is 
-//        required as the architecture of the NCO is constantly calculating the 
-//        output so 'phase_rst' clears the accumulated phase for the next cycle.
 // ============================================================================
 `timescale 1ns / 1ps
 module nco(
-    input wire clk_150mhz,  // 150 MHz clock generated from PLL
-    input wire rst,         // master switch on-board
-    input wire [29:0] ftw,  // 30-bit register sitting in fabric changing from C program
-    input wire [29:0] ptw,  // 30-bit Phase Tuning Word (PTW) from C program
-    input phase_rst,        // phase reset from sequencer
-    output wire [9:0] db    // 10-bit output going to external DAC (on GPIO pins)
+    input wire clk_150mhz,      // 150 MHz clock generated from PLL
+    input wire rst,             // master switch on-board
+    input wire [28:0] ftw,      // 29-bit register sitting in fabric changing from C program
+    input wire [28:0] ptw,      // 29-bit Phase Tuning Word (PTW) from C program
+    input wire [28:0] atw,      // 29-bit scaling factor to scale the amplitude of the ouput wave
+    input phase_rst,            // phase reset from sequencer
+    output wire signed [9:0] db // 10-bit output going to external DAC (on GPIO pins)
     );
 
     // interconnects
-    wire [29:0] lut_idx;
-    wire [29:0] accumulated_phase;
+    wire [28:0] lut_idx;
+    wire [28:0] accumulated_phase;
 
     // PTW Logic: inject phase offset
     assign lut_idx = accumulated_phase + ptw;
@@ -39,7 +36,22 @@ module nco(
         .clk_150mhz (clk_150mhz),
         .rst        (rst),
         .lut_idx    (lut_idx),
-        .db         (db)
+        .lut_out    (lut_out)
     );
+
+    // implement ATW logic
+    reg signed [20:0] product;  // multiplying bytes increases bit size
+    wire signed [9:0] lut_out;  // intermediate wire 
+
+    always @(posedge clk_150mhz or posedge rst) begin
+        if (rst) begin
+            product <= 21'sd0;  // sd means signed decimal
+        end else begin
+            product <= lut_out * $signed({1'b0, atw[10:0]});     // only want atw to be a value from [0,1024] (11-bit) and have to lead with 0 to enforce twos complement
+        end
+    end
+
+    // pull top 10 bits of product
+    assign db = product[19:10];
 
 endmodule

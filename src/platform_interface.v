@@ -17,7 +17,7 @@ module platform_interface(
   input wire avs_addr,                // avs address (dont know it yet) used to route data to 'run_enable' or FIFO
   output wire clk_150mhz,             // output 150 MHz clock for external DAC clock
   output wire trigger,                // output trigger for the oscilloscope to synchronize oscilloscope reading and RF pulses
-  output wire [9:0] db                // 10-bit external DAC output 
+  output wire signed [9:0] db         // 10-bit external DAC output 
   );
 
   // ========================================================
@@ -35,7 +35,7 @@ module platform_interface(
   wire phase_rst_flag;
 
   // NCO <==> MUX
-  wire [9:0] nco_db;
+  wire signed [9:0] nco_db;
 
   // Sequencer --> MUX
   wire pulse_flag;
@@ -56,7 +56,7 @@ module platform_interface(
   // define local_rst logic: locked needs to be inverted and OR'd with 'rst'
   assign local_rst = ~locked | rst;
   // Output MUX (If pulse is active, output sine wave. Otherwise, output silence)
-  assign db = pulse_flag ? nco_db : 10'h1FF;
+  assign db = pulse_flag ? nco_db : 10'h000;
 
   // ========================================================
   // Run Enable Register & CDC Synchronizer

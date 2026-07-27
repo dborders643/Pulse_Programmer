@@ -20,7 +20,7 @@ module sine_pac(
     reg [9:0] sine_lut [1023:0];    // defines array of 1024x10 of memory -> "1024 rows of 10 columns of memory"
 
     initial begin
-        $readmemh("sine_lut.hex", sine_lut);   // read precalculated hex sine LUT formated like 0x000
+        $readmemh("sine_lut_2comp.hex", sine_lut);   // read precalculated hex sine LUT formated like 0x000
     end
 
     always@(posedge clk_150mhz or posedge rst) begin

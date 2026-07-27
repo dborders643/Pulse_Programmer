@@ -18,6 +18,7 @@ module nco(
     // interconnects
     wire [28:0] lut_idx;
     wire [28:0] accumulated_phase;
+    wire signed [9:0] lut_out;
 
     // PTW Logic: inject phase offset
     assign lut_idx = accumulated_phase + ptw;
@@ -41,7 +42,6 @@ module nco(
 
     // implement ATW logic
     reg signed [20:0] product;  // multiplying bytes increases bit size
-    wire signed [9:0] lut_out;  // intermediate wire 
 
     always @(posedge clk_150mhz or posedge rst) begin
         if (rst) begin

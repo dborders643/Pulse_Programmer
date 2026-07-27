@@ -30,8 +30,9 @@ module platform_interface(
   wire rdreq_sig;
 
   // Sequencer <==> NCO
-  wire [29:0] ftw_bus;
-  wire [29:0] ptw_bus;
+  wire [28:0] ftw_bus;
+  wire [28:0] ptw_bus;
+  wire [28:0] atw_bus;
   wire phase_rst_flag;
 
   // NCO <==> MUX
@@ -108,6 +109,7 @@ module platform_interface(
     .rdreq      (rdreq_sig),
     .ftw        (ftw_bus),
     .ptw        (ptw_bus),
+    .atw        (atw_bus),
     .phase_rst  (phase_rst_flag),
     .trigger    (trigger),
     .pulse      (pulse_flag)
@@ -127,6 +129,7 @@ module platform_interface(
     .rst        (local_rst),
     .ftw        (ftw_bus),
     .ptw        (ptw_bus),
+    .atw        (atw_bus),
     .phase_rst  (phase_rst_flag),
     .db         (nco_db)
   );

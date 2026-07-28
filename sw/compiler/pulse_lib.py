@@ -20,6 +20,13 @@ class Sequence:
             'phase_deg': offset
         })
 
+    def set_amp(self, amp: float):
+        """Set the amplitude of your wave. Range is [0,1]"""
+        self.commands.append({
+            'type': 'AMP',
+            'ampl': amp
+        })
+
     def pulse(self, duration: float):
         """Add a pulse command (duraiton in ns)"""
         self.commands.append({

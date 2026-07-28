@@ -80,6 +80,7 @@ seq = Sequence()
 comp = Compiler()
 
 # Define Pulse Instructions
+seq.set_amp(0.5)        # 50% max amplitude wave
 seq.set_freq(1.0)       # 1.0 MHz
 seq.set_phs_off(90)     # 90 degrees offset
 seq.pulse(500)          # 500 ns pulse

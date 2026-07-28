@@ -25,7 +25,7 @@ module pulse_programmer(
 	input 						KEY,
 
 	//////////// Custom Outputs //////////
-	output 			[9:0] 		db,				// 10-bit output going into DAC
+	output signed   [9:0] 		db,				// 10-bit output going into DAC
 	output 			[2:0]		vgnd,			// virtual grounds for RF shielding
 	output 						trigger,		// trigger for o-scope
 	output						clk_150mhz, 	// 150 MHz DAC clock

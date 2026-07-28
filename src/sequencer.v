@@ -66,7 +66,7 @@ module sequencer(
                     phase_rst <= 1'b0;
                     trigger <= 1'b0;
                     pulse <= 1'b0;
-                    if (~rdempty && run_enable) begin
+                    if (~rdempty & run_enable) begin
                         state <= START_TRIGGER;
                     end
                 end

@@ -32,11 +32,18 @@ module nco(
         .accumulated_phase  (accumulated_phase)
     );
 
-    // instantiate sine PAC
-    sine_pac u_sine_pac (
+    // TODO: instantiate a envelope accumulator. This must also include a 'etw'. Must edit files, nco, sequencer. Also need to create a 'envelope_accumulator.v' module
+    // TODO: generate a envelope.hex file and change the ip RAM block to automatically load that
+    // instantiate pulse shaper
+    pulse_shaper u_pulse_shaper(
+        .clk_50mhz  (clk_50mhz),
         .clk_150mhz (clk_150mhz),
         .rst        (rst),
         .lut_idx    (lut_idx),
+        .env_idx    (env_idx),  // !: this won't work in current state. Look to TODOs to find fix.
+        .wr_addr    (wr_addr),
+        .wr_data    (wr_data),
+        .wr_en      (wr_en),
         .lut_out    (lut_out)
     );
 

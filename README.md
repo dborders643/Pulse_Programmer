@@ -161,7 +161,7 @@ Below are the schematics and behavioral diagrams mapping the current FPGA archit
   <img src="images/phase_accumulator.png" alt="Phase Accumulator Schematic">
 </div>
 
-### Sine Phase-to-Amplitude Converter Block Diagram
+### Pulse Shaper Block Diagram
 <div align="center">
-  <img src="images/sine_pac.png" alt="Sine PAC Schematic">
+  <img src="images/pulse_shaper.png" alt="Pulse Shaper Schematic">
 </div>

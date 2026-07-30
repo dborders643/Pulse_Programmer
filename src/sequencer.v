@@ -57,6 +57,7 @@ module sequencer(
             ftw <= 29'd0;
             ptw <= 29'd0;
             atw <= 29'b0;
+            etw <= 29'd0;
             timer <= 29'd0;
             carrier_rst <= 1'b0;
             env_en <= 1'b0;
@@ -84,7 +85,6 @@ module sequencer(
 
                 DECODE: begin
                     trigger <= 1'b0;
-                    carrier_rst <= 1'b1;
                     if (rdreq & ~rdempty) begin
                         case(tag)
 
@@ -136,7 +136,8 @@ module sequencer(
                                 timer <= data;
                                 pulse <= 1'b1;
                                 rdreq <= 1'b0;
-                                env_en <= 1'b1; 
+                                carrier_rst <= 1'b1;
+                                env_en <= 1'b1;
                                 state <= COUNTDOWN;
                             end
 

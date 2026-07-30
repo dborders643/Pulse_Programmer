@@ -42,6 +42,7 @@ pulse_programmer_assignment_defaults.qdf
 __pycache__/
 *.pyc
 test.py
+LUT_scripts/
 
 # output file
 *.bin

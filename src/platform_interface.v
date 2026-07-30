@@ -53,9 +53,9 @@ module platform_interface(
   // Addresses 0x000 to 0x3FF (0 to 1023): Envelope RAM 
   // Address 0x400 (1024): Asynchronous FIFO
   // Address 0x401 (1025): Run Enable Register
-  wire ram_wr_en    = (avs_addr < 12'h400) & avs_write;
-  wire wrreq_in     = (avs_addr == 12'h400) & avs_write;
-  wire run_en_write = (avs_addr == 12'h401) & avs_write;
+  wire ram_wr_en    = (avs_addr < 12'h400) & avs_write;       // write to RAM
+  wire wrreq_in     = (avs_addr == 12'h400) & avs_write;      // write to FIFO
+  wire run_en_write = (avs_addr == 12'h401) & avs_write;      // write to run_enable (control)
 
   // RAM write addr takes lower bits of avs_addr & ram_data does the same
   wire [9:0] ram_wr_addr = avs_addr[9:0];

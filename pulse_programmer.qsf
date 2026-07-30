@@ -423,27 +423,30 @@ set_instance_assignment -name RESERVE_PIN AS_OUTPUT_DRIVING_GROUND -to vgnd[2]
 set_instance_assignment -name RESERVE_PIN AS_OUTPUT_DRIVING_GROUND -to vgnd[1]
 set_instance_assignment -name RESERVE_PIN AS_OUTPUT_DRIVING_GROUND -to vgnd[0]
 set_instance_assignment -name RESERVE_PIN AS_OUTPUT_DRIVING_GROUND -to vgnd
-set_global_assignment -name HEX_FILE sine_lut_2comp.hex
-set_global_assignment -name QIP_FILE computersystem/synthesis/computersystem.qip
-set_global_assignment -name VERILOG_FILE src/sine_pac.v
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name VERILOG_FILE src/sequencer.v
+set_global_assignment -name VERILOG_FILE src/pulse_shaper.v
 set_global_assignment -name VERILOG_FILE src/platform_interface.v
-set_global_assignment -name VERILOG_FILE src/phase_accumulator.v
 set_global_assignment -name VERILOG_FILE src/nco.v
+set_global_assignment -name VERILOG_FILE src/accumulator.v
+set_global_assignment -name HEX_FILE sine_lut_2comp.hex
+set_global_assignment -name HEX_FILE gaussian_envelope.hex
+set_global_assignment -name QIP_FILE computersystem/synthesis/computersystem.qip
 set_global_assignment -name SOURCE_FILE ip/presets/DE1_SOC_DDR3_SETTING.qprs
 set_global_assignment -name SDC_FILE pulse_programmer.SDC
 set_global_assignment -name VERILOG_FILE pulse_programmer.v
 set_global_assignment -name QIP_FILE ip/pll_150mhz.qip
-set_global_assignment -name SIP_FILE ip/pll_150mhz.sip
 set_global_assignment -name QIP_FILE ip/async_FIFO.qip
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-set_global_assignment -name EDA_TEST_BENCH_FILE tb/platform_interface_tb.v -section_id platform_interface_tb
-set_global_assignment -name EDA_TEST_BENCH_FILE src/phase_accumulator.v -section_id platform_interface_tb
-set_global_assignment -name EDA_TEST_BENCH_FILE src/sine_pac.v -section_id platform_interface_tb
-set_global_assignment -name EDA_TEST_BENCH_FILE src/nco.v -section_id platform_interface_tb
-set_global_assignment -name EDA_TEST_BENCH_FILE src/sequencer.v -section_id platform_interface_tb
-set_global_assignment -name EDA_TEST_BENCH_FILE src/platform_interface.v -section_id platform_interface_tb
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name QIP_FILE ip/ram_2_port.qip
+set_global_assignment -name EDA_TEST_BENCH_FILE tb/platform_interface_tb.v -section_id platform_interface_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE ip/async_FIFO.v -section_id platform_interface_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE ip/pll_150mhz.v -section_id platform_interface_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE ip/ram_2_port.v -section_id platform_interface_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE src/accumulator.v -section_id platform_interface_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE src/nco.v -section_id platform_interface_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE src/platform_interface.v -section_id platform_interface_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE src/pulse_shaper.v -section_id platform_interface_tb
+set_global_assignment -name EDA_TEST_BENCH_FILE src/sequencer.v -section_id platform_interface_tb
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

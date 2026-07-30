@@ -11,7 +11,7 @@ module platform_interface_tb();
     reg rst;
     reg [31:0] avs_write_data;
     reg avs_write;
-    reg [31:0] avs_addr;
+    reg [11:0] avs_addr;
     // output
     wire trigger;
     wire clk_150mhz;
@@ -21,8 +21,9 @@ module platform_interface_tb();
     localparam OP_FTW   = 3'b000;
     localparam OP_PTW   = 3'b001;
     localparam OP_ATW   = 3'b010;
-    localparam OP_PULSE = 3'b011;
-    localparam OP_DELAY = 3'b100;
+    localparam OP_ETW   = 3'b011;
+    localparam OP_PULSE = 3'b100;
+    localparam OP_DELAY = 3'b101;
 
     // instantiate top-level module (platform_interface.v)
     platform_interface inst (
@@ -46,7 +47,7 @@ module platform_interface_tb();
         input [31:0] data;
         begin
             @(posedge clk_50mhz);
-            avs_addr = 32'd0;
+            avs_addr = 12'h400;      // address 1024 = FIFO
             avs_write_data = data;
             avs_write = 1'b1;
             @(posedge clk_50mhz);
@@ -60,13 +61,27 @@ module platform_interface_tb();
         input [31:0] control;
         begin
             @(posedge clk_50mhz);
-            avs_addr = 32'd1;
+            avs_addr = 12'h401;      // address 1025 = run_enable (control)
             avs_write_data = control;
             avs_write = 1'b1;
             @(posedge clk_50mhz);
             avs_write = 1'b0;
-            avs_addr = 32'd0;
+            avs_addr = 12'h0;
             avs_write_data = 32'd0;
+        end
+    endtask
+
+    // Helper Task to mimic a RAM write
+    task avalon_write_RAM;
+        input [9:0] addr;
+        input [9:0] data;
+        begin
+            @(posedge clk_50mhz);
+            avs_addr = {2'd0, addr};
+            avs_write_data = {22'd0, data};
+            avs_write = 1'b1;
+            @(posedge clk_50mhz);
+            avs_write = 1'b0;
         end
     endtask
 
@@ -78,7 +93,7 @@ module platform_interface_tb();
         rst = 1'b0;
         avs_write_data = 32'h0;
         avs_write = 1'b0;
-        avs_addr = 32'd0;
+        avs_addr = 12'd0;
 
         // System Reset
         #40;
@@ -94,7 +109,8 @@ module platform_interface_tb();
         // passing in 1 MHz desired f_out --> FTW = f_out * 2^N/f_ref_clk ==> FTW = 1e6*2^30 / 150e6 = 30'd7158279 = 30'h6D3A07
         avalon_write_FIFO({OP_FTW, 29'h369D03});
 
-        // 3. Load RF Pulse (Duration = 500 clock cycles)
+        // 3. Load RF Pulse (Duration = 500 clock cycles) (ETW generates before PULSE)
+        avalon_write_FIFO({OP_ETW, 29'h010624E});
         avalon_write_FIFO({OP_PULSE, 29'h1F4});
 
         // 4. Load Delay (Duration = 300 clock cycles, bit 32 = 0)
@@ -111,6 +127,7 @@ module platform_interface_tb();
         avalon_write_FIFO({OP_ATW, 29'h133});
 
         // 8. Pulse one more time
+        avalon_write_FIFO({OP_ETW, 29'h010624E});
         avalon_write_FIFO({OP_PULSE, 29'h1F4});
 
         // 8. Start Experiment

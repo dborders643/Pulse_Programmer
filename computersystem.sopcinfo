@@ -5,11 +5,11 @@
  version="1.0"
  fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2026.07.27.17:04:42 -->
+ <!-- 2026.07.29.23:12:34 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1785186281</value>
+  <value>1785381154</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -337,8 +337,8 @@ parameters are a RESULT of the module parameters. -->
    <clockDomainMember>
     <isBridge>false</isBridge>
     <moduleName>pulse_programmer_0</moduleName>
-    <slaveName>clk_50mhz</slaveName>
-    <name>pulse_programmer_0.clk_50mhz</name>
+    <slaveName>clock_50mhz</slaveName>
+    <name>pulse_programmer_0.clock_50mhz</name>
    </clockDomainMember>
    <clockDomainMember>
     <isBridge>false</isBridge>
@@ -15843,7 +15843,7 @@ parameters are a RESULT of the module parameters. -->
     <slaveName>avalon_slave_0</slaveName>
     <name>pulse_programmer_0.avalon_slave_0</name>
     <baseAddress>0</baseAddress>
-    <span>8</span>
+    <span>16384</span>
    </memoryBlock>
   </interface>
  </module>
@@ -41521,7 +41521,7 @@ parameters are a RESULT of the module parameters. -->
     <slaveName>avalon_slave_0</slaveName>
     <name>pulse_programmer_0.avalon_slave_0</name>
     <baseAddress>0</baseAddress>
-    <span>8</span>
+    <span>16384</span>
    </memoryBlock>
   </interface>
  </module>
@@ -42648,7 +42648,7 @@ parameters are a RESULT of the module parameters. -->
     <slaveName>avalon_slave_0</slaveName>
     <name>pulse_programmer_0.avalon_slave_0</name>
     <baseAddress>4280287232</baseAddress>
-    <span>8</span>
+    <span>16384</span>
    </memoryBlock>
    <memoryBlock>
     <isBridge>false</isBridge>
@@ -43471,7 +43471,7 @@ parameters are a RESULT of the module parameters. -->
     <slaveName>avalon_slave_0</slaveName>
     <name>pulse_programmer_0.avalon_slave_0</name>
     <baseAddress>4280287232</baseAddress>
-    <span>8</span>
+    <span>16384</span>
    </memoryBlock>
    <memoryBlock>
     <isBridge>false</isBridge>
@@ -71129,7 +71129,7 @@ parameters are a RESULT of the module parameters. -->
    </parameter>
    <parameter name="addressSpan">
     <type>java.math.BigInteger</type>
-    <value>8</value>
+    <value>16384</value>
     <derived>true</derived>
     <enabled>true</enabled>
     <visible>false</visible>
@@ -71153,7 +71153,7 @@ parameters are a RESULT of the module parameters. -->
    </parameter>
    <parameter name="associatedClock">
     <type>java.lang.String</type>
-    <value>clk_50mhz</value>
+    <value>clock_50mhz</value>
     <derived>false</derived>
     <enabled>true</enabled>
     <visible>true</visible>
@@ -71440,11 +71440,11 @@ parameters are a RESULT of the module parameters. -->
    <port>
     <name>avs_addr</name>
     <direction>Input</direction>
-    <width>1</width>
+    <width>12</width>
     <role>address</role>
    </port>
   </interface>
-  <interface name="clk_50mhz" kind="clock_sink" version="18.1">
+  <interface name="clock_50mhz" kind="clock_sink" version="18.1">
    <!-- The connection points exposed by a module instance for the
 particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
@@ -71511,7 +71511,7 @@ particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
    <parameter name="associatedClock">
     <type>java.lang.String</type>
-    <value>clk_50mhz</value>
+    <value>clock_50mhz</value>
     <derived>false</derived>
     <enabled>true</enabled>
     <visible>true</visible>
@@ -71550,7 +71550,7 @@ parameters are a RESULT of the module parameters. -->
     <role>reset</role>
    </port>
   </interface>
-  <interface name="output" kind="conduit_end" version="18.1">
+  <interface name="out" kind="conduit_end" version="18.1">
    <!-- The connection points exposed by a module instance for the
 particular module parameters. Connection points and their
 parameters are a RESULT of the module parameters. -->
@@ -71595,16 +71595,16 @@ parameters are a RESULT of the module parameters. -->
     <role>clk_150mhz_out</role>
    </port>
    <port>
-    <name>trigger</name>
-    <direction>Output</direction>
-    <width>1</width>
-    <role>trigger_out</role>
-   </port>
-   <port>
     <name>db</name>
     <direction>Output</direction>
     <width>10</width>
     <role>db_out</role>
+   </port>
+   <port>
+    <name>trigger</name>
+    <direction>Output</direction>
+    <width>1</width>
+    <role>trigger_out</role>
    </port>
   </interface>
  </module>
@@ -79644,11 +79644,11 @@ parameters are a RESULT of the module parameters. -->
   <endConnectionPoint>avalon_slave_0</endConnectionPoint>
  </connection>
  <connection
-   name="clk_0.clk/pulse_programmer_0.clk_50mhz"
+   name="clk_0.clk/pulse_programmer_0.clock_50mhz"
    kind="clock"
    version="18.1"
    start="clk_0.clk"
-   end="pulse_programmer_0.clk_50mhz">
+   end="pulse_programmer_0.clock_50mhz">
   <parameter name="deviceFamily">
    <type>java.lang.String</type>
    <value>UNKNOWN</value>
@@ -79668,7 +79668,7 @@ parameters are a RESULT of the module parameters. -->
   <startModule>clk_0</startModule>
   <startConnectionPoint>clk</startConnectionPoint>
   <endModule>pulse_programmer_0</endModule>
-  <endConnectionPoint>clk_50mhz</endConnectionPoint>
+  <endConnectionPoint>clock_50mhz</endConnectionPoint>
  </connection>
  <connection
    name="clk_0.clk/hps_0_bridges.h2f_lw_axi_clock"

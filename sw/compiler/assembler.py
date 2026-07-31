@@ -24,7 +24,7 @@ def amp2atw(ampl: float):
     """Converts normalized amplitude [0,1.0] to a atw."""
     ampl = max(0.0, min(1.0, ampl)) # limits input to range [0,1]
     K = 10
-    atw = ampl * (2**K - 1)
+    atw = ampl * (2**K)
     return int(round(atw))
 
 def dur2etw(duration: float, clk_mhz: float = 150.0):
@@ -86,13 +86,15 @@ class Compiler:
                 compiled_words.append(word_etw)
 
                 # 2). Calculate & send pulse instruction word
-                pulse_val = int(cmd['duration_ns'] / self.ns_per_cycle) & val_mask
+                cycles = int(round(cmd['duration_ns'] / self.ns_per_cycle))
+                pulse_val = max(0, cycles - 1) & val_mask
                 word_pulse = ((self.OP_PULSE & op_mask) << 29) | pulse_val
                 compiled_words.append(word_pulse)
 
             elif cmd_type == 'DELAY':
                 opcode = self.OP_DELAY
-                val = int(cmd['duration_ns'] / self.ns_per_cycle) & val_mask
+                cycles = int(round(cmd['duration_ns'] / self.ns_per_cycle))
+                val = max(0, cycles - 1) & val_mask
                 word32 = ((opcode & op_mask) << 29) | val
                 compiled_words.append(word32)
 

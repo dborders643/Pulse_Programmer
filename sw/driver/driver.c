@@ -5,7 +5,7 @@
 // ============================================================================
 // TOGGLE THIS: Set to 1 to test on PC, Set to 0 for Real FPGA Board
 // ============================================================================
-#define MOCK_FPGA 1 
+#define MOCK_FPGA 1
 
 #if MOCK_FPGA
     // --- MOCK PC TESTING MODE ---
@@ -54,7 +54,7 @@
             perror("[ERROR] Failed to open /dev/mem");
             return -1;
         }
-        fpga_ptr = (volatile uint32_t *)mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, dev_mem_fd, TARGET_BASE_ADDR);
+        fpga_ptr = (volatile uint32_t *)mmap(NULL, TARGET_SPAN, PROT_READ | PROT_WRITE, MAP_SHARED, dev_mem_fd, TARGET_BASE_ADDR);
         if (fpga_ptr == MAP_FAILED) {
             perror("[ERROR] mmap failed");
             close(dev_mem_fd);
@@ -66,7 +66,7 @@
 
     void fpga_cleanup(void) {
         if (fpga_ptr != NULL && fpga_ptr != MAP_FAILED) {
-            munmap((void *)fpga_ptr, 4096);
+            munmap((void *)fpga_ptr, TARGET_SPAN);
             fpga_ptr = NULL;
         }
         if (dev_mem_fd >= 0) {

@@ -13,7 +13,7 @@ class Sequence:
             'freq_mhz': freq
         })
 
-    def set_phs_off(self, offset):
+    def set_phs_off(self, offset: float):
         """Set a phase offset (offset in degrees)"""
         self.commands.append({
             'type': 'PHS',
@@ -28,7 +28,7 @@ class Sequence:
         })
 
     def pulse(self, duration: float):
-        """Add a pulse command (duraiton in ns)"""
+        """Add a pulse command (duration in ns)"""
         self.commands.append({
             'type': 'PULSE',
             'duration_ns': duration

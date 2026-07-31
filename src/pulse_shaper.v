@@ -62,8 +62,8 @@ module pulse_shaper(
         end else begin
             car_env_prod <= $signed({1'b0, eff_env}) * sine_val;   // multiplies carrier x envelope
             wave_out <= car_env_prod[19:10];
-            debug_env <= eff_env;
-            debug_car <= sine_val;
+            debug_env <= eff_env;       // NOTE: appears 2 clock cycles ahead of db due to polling CL
+            debug_car <= sine_val;      // NOTE: appears 2 clock cycles ahead of db due to polling CL
         end
     end
 

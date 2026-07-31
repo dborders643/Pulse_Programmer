@@ -68,6 +68,6 @@ module nco(
     end
 
     // pull top 10 bits of product
-    assign db = product[20:11];     // its not bits [21:12] because bit 21 is sign convention so if we did then we'd scale output by 1/2
+    assign db = product[19:10];     // its not bits [21:12] because bit 21 is sign convention so if we did then we'd scale output by 1/2
 
 endmodule

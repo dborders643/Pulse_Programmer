@@ -43,7 +43,7 @@ module accumulator(
             env_acc <= 29'd0;
         end else if (env_en) begin
             // check if env_acc has stepped through max RAM addr (10'd1023)
-            if (env_acc[28:19] == 10'd1023) begin
+            if (env_acc[28:19] >= 10'd1023) begin
                 env_acc <= env_acc;     // hold at max RAM addr
             end else begin
                env_acc <= env_acc + etw; 

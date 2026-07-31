@@ -10,11 +10,14 @@ module pulse_shaper(
     input wire clk_50mhz,               // 50 MHz brought in for the RAM block (write side)
     input wire clk_150mhz,              // 150 MHz clock from PLL (read side)
     input wire rst,                     // master reset switch on-board
+    input wire env_en,                  // acts as a rdreq for the RAM block (defaults idle value to 'd0 instead of 'd11)
     input wire [9:0] carrier_idx,       // sine LUT index set by FTW from the phase accumulator (ftw-stepped)
     input wire [9:0] env_idx,           // envelope RAM index, from envelope_accumulator (etw-stepped)
     input wire [9:0] wr_addr,           // write address from HPS
     input wire [9:0] wr_data,           // RL agent adjusted envelope values (won't actually use this for awhile)
     input wire wr_en,                   // write enable from HPS
+    output reg [9:0] debug_env,         // outputs plain envelope for debugging purposes
+    output reg signed [9:0] debug_car,  // outputs plain carrier for debugging purposes
     output reg signed  [9:0] wave_out   // output data bits going into the external DAC
     );
 
@@ -27,7 +30,7 @@ module pulse_shaper(
     end
 
     // Envelope RAM block Instantiation
-    wire signed [9:0] env_data;
+    wire [9:0] env_data;
 
     // Instantiate RAM block
     ram_2_port u_ram_2_port(
@@ -43,6 +46,8 @@ module pulse_shaper(
     // interconnects
     reg signed [20:0] car_env_prod;
     reg signed [9:0] sine_val;
+    // gate env_data with env_en
+    wire signed [9:0] eff_env = env_en ? env_data : 10'd0;
 
     // BRAM read -> make sure sine_lut ROM is put into BRAM and shares same clock latency as RAM block
     always @(posedge clk_150mhz) begin
@@ -55,8 +60,10 @@ module pulse_shaper(
             wave_out <= 10'h000;          // using two's complement so range is [-512,511]
             car_env_prod <= 21'sd0;
         end else begin
-            car_env_prod <= env_data * sine_val;   // multiplies carrier x envelope
+            car_env_prod <= $signed({1'b0, eff_env}) * sine_val;   // multiplies carrier x envelope
             wave_out <= car_env_prod[19:10];
+            debug_env <= eff_env;
+            debug_car <= sine_val;
         end
     end
 

@@ -18,7 +18,7 @@ module sequencer(
     output reg [28:0] etw,  // output etw value directed into the NCO
     output reg carrier_rst, // enable to start accumulator countdown
     output reg env_en,      // enable envelope to start counting
-    output reg trigger,     // output trigger on external board to sync up oscilloscope
+    output wire trigger,    // output trigger on external board to sync up oscilloscope
     output reg pulse        // enable to pulse NCO to GPIO output pins
     );
 
@@ -47,6 +47,8 @@ module sequencer(
     // Internal register
     reg [1:0] state;
     reg [28:0] timer;
+    reg trigger_raw;
+    reg [2:0] trigger_sr;   // shift register to OR with raw to hold trigger output
 
     // Sequential Logic
     always @(posedge clk_150mhz or posedge rst) begin
@@ -56,12 +58,12 @@ module sequencer(
             rdreq <= 1'b0;
             ftw <= 29'd0;
             ptw <= 29'd0;
-            atw <= 29'b0;
+            atw <= 29'd0;
             etw <= 29'd0;
             timer <= 29'd0;
             carrier_rst <= 1'b0;
             env_en <= 1'b0;
-            trigger <= 1'b0;
+            trigger_raw <= 1'b0;
             pulse <= 1'b0;
         end else begin
             case(state)
@@ -69,7 +71,7 @@ module sequencer(
                     state <= IDLE;
                     rdreq <= 1'b0;
                     carrier_rst <= 1'b0;
-                    trigger <= 1'b0;
+                    trigger_raw <= 1'b0;
                     pulse <= 1'b0;
                     if (~rdempty & run_enable) begin
                         state <= START_TRIGGER;
@@ -79,12 +81,12 @@ module sequencer(
                 START_TRIGGER: begin
                     rdreq <= 1'b1;
                     carrier_rst <= 1'b0;
-                    trigger <= 1'b1;
+                    trigger_raw <= 1'b1;
                     state <= DECODE;
                 end
 
                 DECODE: begin
-                    trigger <= 1'b0;
+                    trigger_raw <= 1'b0;
                     if (rdreq & ~rdempty) begin
                         case(tag)
 
@@ -156,7 +158,7 @@ module sequencer(
                 COUNTDOWN: begin
                     rdreq <= 1'b0;
                     carrier_rst <= 1'b0;
-                    trigger <= 1'b0;
+                    trigger_raw <= 1'b0;
                     if (timer >= 29'd1) begin
                         timer <= timer - 29'd1;
                         state <= COUNTDOWN;
@@ -174,4 +176,17 @@ module sequencer(
             endcase
         end
     end
+
+    // Cascade trigger signals together 
+    always @(posedge clk_150mhz or posedge rst) begin
+        if (rst) begin
+            trigger_sr <= 3'b0;
+        end else begin
+            trigger_sr <= {trigger_sr[1:0], trigger_raw};
+        end
+    end
+
+    // OR logic to output to 'trigger'
+    assign trigger = trigger_raw | (|trigger_sr);
+
 endmodule

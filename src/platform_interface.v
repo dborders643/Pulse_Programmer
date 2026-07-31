@@ -17,6 +17,8 @@ module platform_interface(
   input wire [11:0] avs_addr,         // routes data into FIFO, control, and RAM
   output wire clk_150mhz,             // output 150 MHz clock for external DAC clock
   output wire trigger,                // output trigger for the oscilloscope to synchronize oscilloscope reading and RF pulses
+  output wire [9:0] debug_env,        // outputs envelope for debugging purposes
+  output wire signed [9:0] debug_car, // outputs carrier for debugging purposes
   output wire signed [9:0] db         // 10-bit external DAC output 
   );
 
@@ -151,6 +153,8 @@ module platform_interface(
     .ptw        (ptw_bus),
     .atw        (atw_bus),
     .etw        (etw_bus),
+    .debug_env  (debug_env),
+    .debug_car  (debug_car),
     .db         (nco_db)
   );
 

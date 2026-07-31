@@ -16,6 +16,8 @@ module platform_interface_tb();
     wire trigger;
     wire clk_150mhz;
     wire [9:0] db;
+    wire [9:0] debug_env;
+    wire [9:0] debug_car;
 
     // opcodes defined
     localparam OP_FTW   = 3'b000;
@@ -34,6 +36,8 @@ module platform_interface_tb();
         .avs_addr       (avs_addr),
         .clk_150mhz     (clk_150mhz),
         .trigger        (trigger),
+        .debug_env      (debug_env),
+        .debug_car      (debug_car),
         .db             (db)
     );
 

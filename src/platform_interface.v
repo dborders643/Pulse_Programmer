@@ -14,9 +14,11 @@ module platform_interface(
   input wire rst,                     // on-board reset
   input wire [31:0] avs_write_data,   // 32-bit avalon write data
   input wire avs_write,               // avalon write enable
-  input wire avs_addr,                // avs address (dont know it yet) used to route data to 'run_enable' or FIFO
+  input wire [11:0] avs_addr,         // routes data into FIFO, control, and RAM
   output wire clk_150mhz,             // output 150 MHz clock for external DAC clock
   output wire trigger,                // output trigger for the oscilloscope to synchronize oscilloscope reading and RF pulses
+  output wire [9:0] debug_env,        // outputs envelope for debugging purposes
+  output wire signed [9:0] debug_car, // outputs carrier for debugging purposes
   output wire signed [9:0] db         // 10-bit external DAC output 
   );
 
@@ -33,7 +35,9 @@ module platform_interface(
   wire [28:0] ftw_bus;
   wire [28:0] ptw_bus;
   wire [28:0] atw_bus;
-  wire phase_rst_flag;
+  wire [28:0] etw_bus;
+  wire carrier_rst_flag;
+  wire env_en_flag;
 
   // NCO <==> MUX
   wire signed [9:0] nco_db;
@@ -45,9 +49,19 @@ module platform_interface(
   wire locked;
   wire local_rst;
 
-  // Address decoding logic --> combinational logic needed to tell when HPS write to data or control address
-  wire wrreq_in = (avs_addr == 1'b0) & avs_write;
-  wire run_en_write = (avs_addr == 1'b1) & avs_write; 
+  // ========================================================
+  // Memory Map & Address Decoding
+  // ========================================================
+  // Addresses 0x000 to 0x3FF (0 to 1023): Envelope RAM 
+  // Address 0x400 (1024): Asynchronous FIFO
+  // Address 0x401 (1025): Run Enable Register
+  wire ram_wr_en    = (avs_addr < 12'h400) & avs_write;       // write to RAM
+  wire wrreq_in     = (avs_addr == 12'h400) & avs_write;      // write to FIFO
+  wire run_en_write = (avs_addr == 12'h401) & avs_write;      // write to run_enable (control)
+
+  // RAM write addr takes lower bits of avs_addr & ram_data does the same
+  wire [9:0] ram_wr_addr = avs_addr[9:0];
+  wire [9:0] ram_data = avs_write_data[9:0];
 
   // Internal Registers
   reg run_enable;
@@ -87,7 +101,7 @@ module platform_interface(
   // ========================================================
 
   // instantiate Asynchronous FIFO
-  async_FIFO async_FIFO_inst (
+  async_FIFO u_async_FIFO (
     .aclr   (rst),
     .data   (avs_write_data),
     .rdclk  (clk_150mhz),
@@ -100,7 +114,7 @@ module platform_interface(
   );
 
   // instantiate Sequencer 
-  sequencer sequencer_inst (
+  sequencer u_sequencer (
     .clk_150mhz (clk_150mhz),
     .rst        (local_rst),
     .rdempty    (rdempty_flag),
@@ -110,13 +124,15 @@ module platform_interface(
     .ftw        (ftw_bus),
     .ptw        (ptw_bus),
     .atw        (atw_bus),
-    .phase_rst  (phase_rst_flag),
+    .etw        (etw_bus),
+    .carrier_rst(carrier_rst_flag),
+    .env_en     (env_en_flag),
     .trigger    (trigger),
     .pulse      (pulse_flag)
   );
 
   // instantiate IP Catalog PLL module
-  pll_150mhz pll_150mhz_inst (
+  pll_150mhz u_pll_150mhz (
     .refclk     (clk_50mhz),
     .rst        (rst),
     .outclk_0   (clk_150mhz),
@@ -124,13 +140,22 @@ module platform_interface(
   );  
 
   // instantiate the NCO module
-  nco  nco_inst (
+  nco  u_nco (
+    .clk_50mhz  (clk_50mhz),
     .clk_150mhz (clk_150mhz),
     .rst        (local_rst),
+    .carrier_rst(carrier_rst_flag),
+    .env_en     (env_en_flag),
+    .wr_addr    (ram_wr_addr),
+    .wr_data    (ram_data),
+    .wr_en      (ram_wr_en),
     .ftw        (ftw_bus),
     .ptw        (ptw_bus),
     .atw        (atw_bus),
-    .phase_rst  (phase_rst_flag),
+    .etw        (etw_bus),
+    .debug_env  (debug_env),
+    .debug_car  (debug_car),
     .db         (nco_db)
   );
+
   endmodule

@@ -67,7 +67,7 @@
  <interface name="memory" internal="hps_0.memory" type="conduit" dir="end" />
  <interface
    name="pp_out"
-   internal="pulse_programmer_0.output"
+   internal="pulse_programmer_0.out"
    type="conduit"
    dir="end" />
  <interface name="reset" internal="clk_0.clk_in_reset" type="reset" dir="end" />
@@ -625,7 +625,7 @@
    kind="clock"
    version="18.1"
    start="clk_0.clk"
-   end="pulse_programmer_0.clk_50mhz" />
+   end="pulse_programmer_0.clock_50mhz" />
  <connection
    kind="clock"
    version="18.1"

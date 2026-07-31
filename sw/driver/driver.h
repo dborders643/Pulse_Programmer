@@ -13,8 +13,8 @@
 #define PULSE_PROG_BASE     0x00000000
 // Combined absolute base addr for mmap()
 #define TARGET_BASE_ADDR    (HW_REGS_BASE + PULSE_PROG_BASE)
-// Memory span: 8 bytes (0x0000_0000 + 0x0000_0007)
-#define TARGET_SPAN         8
+// Memory span
+#define TARGET_SPAN         0x4000
 // 32-bit word offsets
 #define REG_DATA_OFFSET     0   // word 0 (byte offset 0x00) --> BRAM input
 #define REG_START_OFFSET    1   // word 1 (byte offset 0x04) --> Start trigger

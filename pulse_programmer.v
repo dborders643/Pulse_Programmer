@@ -4,6 +4,7 @@
 //=======================================================
 
 module pulse_programmer(
+	// TODO: include output rx_en so pin planner can assign rx_en to a GPIO_0 pin
 
 	//////////// ADC //////////
 	//output		          		ADC_CONVST,
@@ -96,6 +97,7 @@ module pulse_programmer(
 //=======================================================
 
 	computersystem u0 (
+		// TODO: update platform designer file to include rx_en in conduit
 		// Clock & Reset
 		.clk_clk                          (CLOCK_50),          // 50MHz board oscillator
 		.reset_reset_n                    (KEY),               // Key 0 acts as system reset (active low)

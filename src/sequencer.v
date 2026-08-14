@@ -5,7 +5,14 @@
 //              a ftw, ptw, atw, etw, or timer (in clock cycles) value. The sequencer is tied to the asynchronous FIFO and output multiplexer.  
 // ==========================================================================================================================================================
 `timescale 1ns / 1ps
+
+// TODO: make the rx_en do this:
+// TODO: - software will send a 32-bit data signal with top 3 bits containing OP_RX
+// TODO: - the other 29-bits == 1, which will route to rx_en (output for rf switch)
+// TODO: - software will send this word and another holding the FSM in COUNTDOWN for the desired amount of time to receive
+
 module sequencer(
+    // TODO: add in new output to control rf switch 'rx_en' (receive enable)
     input wire clk_150mhz,  // 150 MHz clock coming from the DDS output (PLL block)
     input wire rst,         // on-board master reset
     input wire rdempty,     // tells if the async FIFO block is empty
@@ -33,6 +40,7 @@ module sequencer(
     localparam COUNTDOWN     = 2'b11;       // counts down the pulse or delay data
 
     // Instruction Opcodes
+    // TODO: add in new opcode for rx_en 'OP_RX'
     localparam OP_FTW   = 3'b000;
     localparam OP_PTW   = 3'b001;
     localparam OP_ATW   = 3'b010;
@@ -51,6 +59,7 @@ module sequencer(
     reg [2:0] trigger_sr;   // shift register to OR with raw to hold trigger output
 
     // Sequential Logic
+    //TODO: when rx_en == 1 : rf switch will change pipeline so coil -> switch -> LNA -> O-Scope, otherwise stay in transmit mode
     always @(posedge clk_150mhz or posedge rst) begin
         if (rst) begin
             // reset all states and safely mute the RF pulse

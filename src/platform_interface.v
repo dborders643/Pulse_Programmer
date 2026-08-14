@@ -10,6 +10,7 @@
 // ============================================================================
 `timescale 1ns / 1ps
 module platform_interface(
+  // TODO: output rf switch control 'rx_en'
   input wire clk_50mhz,               // 50 MHz crystal oscillator
   input wire rst,                     // on-board reset
   input wire [31:0] avs_write_data,   // 32-bit avalon write data
@@ -114,6 +115,7 @@ module platform_interface(
   );
 
   // instantiate Sequencer 
+  // TODO: route rx_en to NCO rx_en
   sequencer u_sequencer (
     .clk_150mhz (clk_150mhz),
     .rst        (local_rst),

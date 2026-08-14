@@ -3,6 +3,14 @@ class Sequence:
     Main sequence builder. Tracks user commands and formats them into hardware instructions for the FPGA.
     """
 
+    # TODO: Going to have to rework sturcture so that software supports follwing functionality:
+    # TODO: - Able to compute optimal flip angle and/or quantum gate operation (requested by user in script) using provided power amplification and pulse duration
+    # TODO:   (see rf_amp_calc.py and technical note for theory and calculation, in NMR_Spectrometer directory).
+    # TODO: - Able to switch between transmit (Tx) and receieve (Rx) mode based off user command.
+    # TODO: - Include scripting for 'Inversion Recovery', 'CPMG', 'Hahn Echo', and 'Free Induction Decay' pulse sequences for popular quantum cdontrol experiments
+    # TODO:   and to find T_1, T_2, and T_2* times for specific setup.
+    # TODO: - software will send this word and another holding the FSM in COUNTDOWN for the desired amount of time to receive
+
     def __init__(self):
         self.commands = []                  # initialize an empty set of strings named 'commands'
 

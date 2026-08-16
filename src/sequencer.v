@@ -41,22 +41,22 @@ module sequencer(
 
     // Instruction Opcodes
     // TODO: add in new opcode for rx_en 'OP_RX'
-    localparam OP_FTW   = 3'b000;
-    localparam OP_PTW   = 3'b001;
-    localparam OP_ATW   = 3'b010;
-    localparam OP_ETW   = 3'b011;
-    localparam OP_PULSE = 3'b100;
-    localparam OP_DELAY = 3'b101;
+    localparam OP_FTW   = 3'b000;           // tells sequencer to route 'data' to 'ftw' output
+    localparam OP_PTW   = 3'b001;           // tells sequencer to route 'data' to 'ptw' output
+    localparam OP_ATW   = 3'b010;           // tells sequencer to route 'data' to 'atw' output
+    localparam OP_ETW   = 3'b011;           // tells sequencer to route 'data' to 'etw' output
+    localparam OP_PULSE = 3'b100;           // tells sequencer to route 'data' to 'timer' and pull 'pulse' output high
+    localparam OP_DELAY = 3'b101;           // tells sequencer to route 'data' to 'timer' output but not pull 'pulse' high
     
     // data slicing ==> 32-bit input == 3-bit tag OPCODE || 29-bit data
-    wire [2:0] tag = q[31:29];
-    wire [28:0] data = q[28:0];
+    wire [2:0] tag = q[31:29];              // slices top 3 bits of q to cleanly seperate OPCODES
+    wire [28:0] data = q[28:0];             // slices bottom 29 bits of q to seperate raw data
 
     // Internal register
-    reg [1:0] state;
-    reg [28:0] timer;
-    reg trigger_raw;
-    reg [2:0] trigger_sr;   // shift register to OR with raw to hold trigger output
+    reg [1:0] state;                        // internal register holding current state of sequencer
+    reg [28:0] timer;                       // internal timer counting down # of clock cycles sent from 'data' 
+    reg trigger_raw;                        // raw trigger instantiated by 'START_TRIGGER' state
+    reg [2:0] trigger_sr;                   // shift register to OR with raw to hold trigger output for 4 clock cycles
 
     // Sequential Logic
     //TODO: when rx_en == 1 : rf switch will change pipeline so coil -> switch -> LNA -> O-Scope, otherwise stay in transmit mode

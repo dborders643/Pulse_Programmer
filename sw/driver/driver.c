@@ -5,7 +5,7 @@
 // ============================================================================
 // TOGGLE THIS: Set to 1 to test on PC, Set to 0 for Real FPGA Board
 // ============================================================================
-#define MOCK_FPGA 1
+#define MOCK_FPGA 0
 
 #if MOCK_FPGA
     // --- MOCK PC TESTING MODE ---

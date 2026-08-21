@@ -66,13 +66,17 @@ module platform_interface(
 
   // Internal Registers
   reg run_enable;
+  // TODO: specifically explain why these sync registers are here
   reg sync_1;
   reg sync_2;
+
+  // Converting Two's Complement Logic to Unsigned Binary for Debugging Purposes
+  wire [9:0] nco_db_unsigned = {~nco_db[9], nco_db[8:0]};   // invert MSB and concatenate other bits
 
   // define local_rst logic: locked needs to be inverted and OR'd with 'rst'
   assign local_rst = ~locked | rst;
   // Output MUX (If pulse is active, output sine wave. Otherwise, output silence)
-  assign db = pulse_flag ? nco_db : 10'h000;
+  assign db = pulse_flag ? nco_db_unsigned : 10'h200;       // switch 'nco_db_unsigned' back to 'nco_db' for two's complement and switch '10'h200' to '10'h000'
 
   // ========================================================
   // Run Enable Register & CDC Synchronizer
@@ -85,7 +89,7 @@ module platform_interface(
       run_enable <= avs_write_data[0];
     end
   end
-
+  // ?: why are we holding run_enable for higher than one clock cycle? For timing synchronization?
   // Second & Third stage: 150 MHz synchronizer pipeline
   always @(posedge clk_150mhz or posedge local_rst) begin
     if (local_rst) begin

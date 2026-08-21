@@ -17,7 +17,7 @@ SRCS := sw/driver/driver.c sw/driver/runner.c
 INCLUDES := -Isw/driver
 
 # Compiler Flags
-CFLAGS := -std=c99
+CFLAGS := -std=c99 -static
 
 # ============================================================================
 # MAKE RULES

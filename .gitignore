@@ -45,6 +45,7 @@ test.py
 LUT_scripts/
 test_stuff/
 sw2hrd_instr_test.py
+tests/
 
 # output file
 *.bin

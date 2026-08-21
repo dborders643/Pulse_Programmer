@@ -16,10 +16,10 @@
 // Memory span
 #define TARGET_SPAN         0x4000
 // 32-bit word offsets
-#define REG_DATA_OFFSET     0   // word 0 (byte offset 0x00) --> BRAM input
-#define REG_START_OFFSET    1   // word 1 (byte offset 0x04) --> Start trigger
+#define REG_DATA_OFFSET     0x400   // word 0 (byte offset 0x00) --> BRAM input
+#define REG_START_OFFSET    0x401   // word 1 (byte offset 0x04) --> Start trigger
 
-#define START_VAL           1   // write 32'd1 to trigger hardware
+#define START_VAL           1       // write 32'd1 to trigger hardware
 
 // ============================================================================
 // FUNCTION DECLARATIONS
